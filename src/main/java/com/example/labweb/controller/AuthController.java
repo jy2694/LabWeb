@@ -33,6 +33,7 @@ public class AuthController {
     @GetMapping("/")
     public String loginMapper(Model model){
         //TODO - 로그인 페이지
+        //model.addAttribute("msg","");
         return loginpage;
     }
 
@@ -51,16 +52,13 @@ public class AuthController {
             return "/main/index";
         } catch(UsernameNotFoundException e){
             model.addAttribute("msg","사용자 계정을 찾을 수 없습니다.");
-            model.addAttribute("url","/");
-            return alert;
+            return loginpage;
         } catch(BadCredentialsException e){
             model.addAttribute("msg","사용자 계정이 존재하지 않거나 비밀번호가 일치하지 않습니다.");
-            model.addAttribute("url","/");
-            return alert;
+            return loginpage;
         } catch(Exception e){
             model.addAttribute("msg","알 수 없는 오류입니다.");
-            model.addAttribute("url","/");
-            return alert;
+            return loginpage;
         }
     }
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -22,6 +22,9 @@
         <div class="login-area">
             <input type="password" name="PW" id="PW" autocapitalize="off" autocomplete="off" required>
             <label for="PW">PASSWORD</label>
+        </div>
+        <div>
+            <p class="error" th:text = "${msg}"></p>
         </div>
         <div class="submission">
             <button id="btn" type="submit">제출</button>
