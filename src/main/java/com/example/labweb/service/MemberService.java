@@ -25,6 +25,20 @@ public class MemberService {
         return member;
     }
 
+    public Optional<MemberEntity> findById(String id){
+        Optional<MemberEntity> member = memberRepository.findAll().stream()
+                .filter(memberEntity -> memberEntity.getId().equals(id))
+                .findAny();
+        return member;
+    }
+
+    public Optional<MemberEntity> findByName(String name){
+        Optional<MemberEntity> member = memberRepository.findAll().stream()
+                .filter(memberEntity -> memberEntity.getName().equals(name))
+                .findAny();
+        return member;
+    }
+
     public void deleteById(Long mbrNo) {
         memberRepository.deleteById(mbrNo);
     }
@@ -41,6 +55,10 @@ public class MemberService {
             e.get().setMbrNo(member.getMbrNo());
             e.get().setId(member.getId());
             e.get().setName(member.getName());
+            e.get().setPassword(member.getPassword());
+            e.get().setRs_number(member.getRs_number());
+            e.get().setSt_number(member.getSt_number());
+            e.get().setEmail(member.getEmail());
             memberRepository.save(member);
         }
     }

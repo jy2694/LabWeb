@@ -15,8 +15,8 @@ public class MainController {
 
     }
 
-    @GetMapping("/")
+    @GetMapping(value = {"/main", "/index"})
     public String mainPageMapper(){
-        return "index";
+        return "/main/index";
     }
 }

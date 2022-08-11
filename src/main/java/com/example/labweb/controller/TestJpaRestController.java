@@ -12,16 +12,25 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * JPA 참고용 클래스입니다. 필요가 없어지면 삭제하겠습니다
+ *          - 제연
+ */
 @RestController
 @RequestMapping("memberTest")
 public class TestJpaRestController {
     // 기본형
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
+    private MemberService memberService;
+
     @Autowired
-    MemberService memberService;
+    public TestJpaRestController(MemberService memberService){
+        this.memberService = memberService;
+    }
 
     // 모든 회원 조회
     @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
@@ -34,8 +43,14 @@ public class TestJpaRestController {
     @GetMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<MemberEntity> getMember(@PathVariable("mbrNo") Long mbrNo) {
         Optional<MemberEntity> member = memberService.findById(mbrNo);
-        return new ResponseEntity<MemberEntity>(member.get(), HttpStatus.OK);
+        return new ResponseEntity<MemberEntity>(member.orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다.")), HttpStatus.OK);
     }
+/*
+    @GetMapping(value = "/{name}", produces = { MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<MemberEntity> getMember(@PathVariable("name") String name){
+        Optional<MemberEntity> member = memberService.findByName(name);
+        return new ResponseEntity<MemberEntity>(member.get(), HttpStatus.OK);
+    }*/
 
     // 회원번호로 회원 삭제
     @DeleteMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
