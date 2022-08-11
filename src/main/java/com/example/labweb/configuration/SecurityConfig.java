@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
                 // login 없이 접근 허용 하는 url
+                .mvcMatchers("/","/css/**","/scripts/**","/plugin/**","/fonts/**").permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/register").permitAll()
                 // '/admin'의 경우 ADMIN 권한이 있는 사용자만 접근이 가능
@@ -58,6 +59,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     public void configure(WebSecurity web) throws Exception {
         // 정적인 파일 요청에 대해 무시
-        web.ignoring().antMatchers(AUTH_WHITELIST);
+        web.ignoring().antMatchers(AUTH_WHITELIST).antMatchers("/resources/**");
     }
 }
