@@ -1,7 +1,7 @@
 package com.example.labweb.service;
 
 import com.example.labweb.repository.MemberRepository;
-import com.example.labweb.vo.MemberEntity;
+import com.example.labweb.domain.MemberEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,15 +20,8 @@ public class MemberService {
         return members;
     }
 
-    public Optional<MemberEntity> findById(Long mbrNo) {
-        Optional<MemberEntity> member = memberRepository.findById(mbrNo);
-        return member;
-    }
-
-    public Optional<MemberEntity> findById(String id){
-        Optional<MemberEntity> member = memberRepository.findAll().stream()
-                .filter(memberEntity -> memberEntity.getId().equals(id))
-                .findAny();
+    public Optional<MemberEntity> findById(String id) {
+        Optional<MemberEntity> member = memberRepository.findById(id);
         return member;
     }
 
@@ -39,8 +32,8 @@ public class MemberService {
         return member;
     }
 
-    public void deleteById(Long mbrNo) {
-        memberRepository.deleteById(mbrNo);
+    public void deleteById(String id) {
+        memberRepository.deleteById(id);
     }
 
     public MemberEntity save(MemberEntity member) {
@@ -48,11 +41,10 @@ public class MemberService {
         return member;
     }
 
-    public void updateById(Long mbrNo, MemberEntity member) {
-        Optional<MemberEntity> e = memberRepository.findById(mbrNo);
+    public void updateById(String id, MemberEntity member) {
+        Optional<MemberEntity> e = memberRepository.findById(id);
 
         if (e.isPresent()) {
-            e.get().setMbrNo(member.getMbrNo());
             e.get().setId(member.getId());
             e.get().setName(member.getName());
             e.get().setPassword(member.getPassword());

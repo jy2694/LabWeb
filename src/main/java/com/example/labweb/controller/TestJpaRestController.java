@@ -1,7 +1,7 @@
 package com.example.labweb.controller;
 
 import com.example.labweb.service.MemberService;
-import com.example.labweb.vo.MemberEntity;
+import com.example.labweb.domain.MemberEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +40,9 @@ public class TestJpaRestController {
     }
 
     // 회원번호로 한명의 회원 조회
-    @GetMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<MemberEntity> getMember(@PathVariable("mbrNo") Long mbrNo) {
-        Optional<MemberEntity> member = memberService.findById(mbrNo);
+    @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<MemberEntity> getMember(@PathVariable("id") String id) {
+        Optional<MemberEntity> member = memberService.findById(id);
         return new ResponseEntity<MemberEntity>(member.orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다.")), HttpStatus.OK);
     }
 /*
@@ -53,16 +53,16 @@ public class TestJpaRestController {
     }*/
 
     // 회원번호로 회원 삭제
-    @DeleteMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<Void> deleteMember(@PathVariable("mbrNo") Long mbrNo) {
-        memberService.deleteById(mbrNo);
+    @DeleteMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<Void> deleteMember(@PathVariable("id") String id) {
+        memberService.deleteById(id);
         return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
     }
 
     // 회원번호로 회원 수정(mbrNo로 회원을 찾아 Member 객체의 id, name로 수정함)
-    @PutMapping(value = "/{mbrNo}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<MemberEntity> updateMember(@PathVariable("mbrNo") Long mbrNo, MemberEntity member) {
-        memberService.updateById(mbrNo, member);
+    @PutMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    public ResponseEntity<MemberEntity> updateMember(@PathVariable("id") String id, MemberEntity member) {
+        memberService.updateById(id, member);
         return new ResponseEntity<MemberEntity>(member, HttpStatus.OK);
     }
 
