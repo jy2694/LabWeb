@@ -10,7 +10,7 @@ body{
     align-items: center;
     align-items: center;
     height: 100vh;
-   background-color: rosybrown;
+    background-color: gray;
     /*background: url(WKU-LOGO.png) no-repeat center;*/
     background-size: cover;
 }

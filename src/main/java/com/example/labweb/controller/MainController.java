@@ -10,11 +10,6 @@ public class MainController {
      * Sign(로그인, 회원가입)
      * 로그인, 메인화면, 회원가입, 게시판(공지사항, 자료실, 갤러리), 스케쥴러, 졸업자
      */
-    @Autowired
-    public MainController(){
-
-    }
-
     @GetMapping(value = {"/main", "/index"})
     public String mainPageMapper(){
         return "/main/index";

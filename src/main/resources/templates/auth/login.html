@@ -1,18 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LabWeb</title>
+    <link rel="stylesheet" href="/css/login.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <title>로그인</title>
 </head>
-<body>
-로그인입니다.
 
-<form method="post" action="/">
-    ID :<input type="text" name="ID"><br>
-    PASSWORD :<input type="text" name="PW"><br>
-    <button type="submit">제출</button>
-</form>
-<a href="/register">회원가입</a>
+<body>
+<section class="login-form">
+    <h1>LOGIN-MAIN</h1>
+    <form method="POST" accept="/">
+        <div class="login-area">
+            <input type="text" name="ID" id="ID" autocapitalize="off" autocomplete="off" required>
+            <label for="ID">ID</label>
+        </div>
+        <div class="login-area">
+            <input type="password" name="PW" id="PW" autocapitalize="off" autocomplete="off" required>
+            <label for="PW">PASSWORD</label>
+        </div>
+        <div class="submission">
+            <button id="btn" type="submit">제출</button>
+        </div>
+
+
+    </form>
+    <div class="caption">
+        <a href="/register">회원가입</a>
+    </div>
+
+</section>
+
+<script>
+        let id = $("#ID");
+        let pw = $("#ID");
+        let btn = $("#btn");
+
+
+    </script>
 </body>
+
 </html>
