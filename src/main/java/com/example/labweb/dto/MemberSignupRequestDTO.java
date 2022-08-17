@@ -9,7 +9,7 @@ public class MemberSignupRequestDTO {
     private String id;
     private String password;
     private String name;
-    private String rs_number;
-    private String st_number;
+    private String researcherId;
+    private String studentId;
     private String email;
 }

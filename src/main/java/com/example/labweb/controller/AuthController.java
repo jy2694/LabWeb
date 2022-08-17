@@ -3,10 +3,7 @@ package com.example.labweb.controller;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.service.AuthService;
-import com.example.labweb.service.MemberService;
-import com.example.labweb.domain.MemberEntity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Controller
