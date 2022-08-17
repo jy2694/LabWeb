@@ -44,6 +44,11 @@ public class AuthController {
         return registerpage;
     }
 
+    @GetMapping("/passchange")
+    public String changeMapper(Model model){
+        return "/auth/passchange";
+    }
+
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
     @PostMapping("/")
     public String loginprocess(Model model, JwtRequestDTO dto){

@@ -45,6 +45,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .mvcMatchers("/","/css/**","/scripts/**","/plugin/**","/fonts/**").permitAll()
                 .antMatchers("/").permitAll()
                 .antMatchers("/register").permitAll()
+                .antMatchers("/passchange").permitAll()
                 // '/admin'의 경우 ADMIN 권한이 있는 사용자만 접근이 가능
                 .antMatchers("/admin").hasRole("ADMIN")
                 // 그 외 모든 요청은 인증과정 필요
