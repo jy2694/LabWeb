@@ -1,6 +1,6 @@
 package com.example.labweb.service;
 
-import com.example.labweb.domain.MemberEntity;
+import com.example.labweb.domain.Member;
 import com.example.labweb.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        MemberEntity member = memberRepository.findById(username)
+        Member member = memberRepository.findById(username)
                 .orElseThrow(()->new UsernameNotFoundException("등록되지 않은 사용자입니다."));
         return new UserDetailsImpl(member);
     }

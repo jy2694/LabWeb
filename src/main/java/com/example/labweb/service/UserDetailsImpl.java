@@ -1,6 +1,6 @@
 package com.example.labweb.service;
 
-import com.example.labweb.domain.MemberEntity;
+import com.example.labweb.domain.Member;
 import com.example.labweb.domain.Role;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,7 +14,7 @@ import java.util.Collection;
 public class UserDetailsImpl implements UserDetails {
 
     private static final String ROLE_PREFIX = "ROLE_";
-    private final MemberEntity member;
+    private final Member member;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

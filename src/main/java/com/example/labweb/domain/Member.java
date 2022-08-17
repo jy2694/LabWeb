@@ -11,37 +11,37 @@ import javax.persistence.Id;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity(name="member")
-public class MemberEntity {
+@Entity
+public class Member {
     @Id
     private String id;
     private String password;
     private String name;
-    private String rs_number;
-    private String st_number;
+    private String researcherId;
+    private String studentId;
     private String email;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @Builder
-    public MemberEntity(String id, String name, String password,
-                String rs_number, String st_number, String email) {
+    public Member(String id, String name, String password,
+                  String researcherId, String studentId, String email) {
         this.id = id;
         this.name = name;
         this.password = password;
-        this.rs_number = rs_number;
-        this.st_number = st_number;
+        this.researcherId = researcherId;
+        this.studentId = studentId;
         this.email = email;
         this.role = Role.USER;
     }
 
-    public MemberEntity(MemberSignupRequestDTO dto){
+    public Member(MemberSignupRequestDTO dto){
         this.id = dto.getId();
         this.name = dto.getName();
         this.password = dto.getPassword();
-        this.rs_number = dto.getRs_number();
-        this.st_number = dto.getSt_number();
+        this.researcherId = dto.getResearcherId();
+        this.studentId = dto.getStudentId();
         this.email = dto.getEmail();
         this.role = Role.USER;
     }

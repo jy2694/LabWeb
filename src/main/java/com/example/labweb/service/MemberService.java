@@ -1,7 +1,7 @@
 package com.example.labweb.service;
 
 import com.example.labweb.repository.MemberRepository;
-import com.example.labweb.domain.MemberEntity;
+import com.example.labweb.domain.Member;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,19 +14,19 @@ public class MemberService {
     @Autowired
     private MemberRepository memberRepository;
 
-    public List<MemberEntity> findAll() {
-        List<MemberEntity> members = new ArrayList<>();
+    public List<Member> findAll() {
+        List<Member> members = new ArrayList<>();
         memberRepository.findAll().forEach(e -> members.add(e));
         return members;
     }
 
-    public Optional<MemberEntity> findById(String id) {
-        Optional<MemberEntity> member = memberRepository.findById(id);
+    public Optional<Member> findById(String id) {
+        Optional<Member> member = memberRepository.findById(id);
         return member;
     }
 
-    public Optional<MemberEntity> findByName(String name){
-        Optional<MemberEntity> member = memberRepository.findAll().stream()
+    public Optional<Member> findByName(String name){
+        Optional<Member> member = memberRepository.findAll().stream()
                 .filter(memberEntity -> memberEntity.getName().equals(name))
                 .findAny();
         return member;
@@ -36,20 +36,20 @@ public class MemberService {
         memberRepository.deleteById(id);
     }
 
-    public MemberEntity save(MemberEntity member) {
+    public Member save(Member member) {
         memberRepository.save(member);
         return member;
     }
 
-    public void updateById(String id, MemberEntity member) {
-        Optional<MemberEntity> e = memberRepository.findById(id);
+    public void updateById(String id, Member member) {
+        Optional<Member> e = memberRepository.findById(id);
 
         if (e.isPresent()) {
             e.get().setId(member.getId());
             e.get().setName(member.getName());
             e.get().setPassword(member.getPassword());
-            e.get().setRs_number(member.getRs_number());
-            e.get().setSt_number(member.getSt_number());
+            e.get().setResearcherId(member.getResearcherId());
+            e.get().setStudentId(member.getStudentId());
             e.get().setEmail(member.getEmail());
             memberRepository.save(member);
         }

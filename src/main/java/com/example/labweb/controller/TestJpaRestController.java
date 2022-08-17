@@ -1,7 +1,7 @@
 package com.example.labweb.controller;
 
 import com.example.labweb.service.MemberService;
-import com.example.labweb.domain.MemberEntity;
+import com.example.labweb.domain.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +34,16 @@ public class TestJpaRestController {
 
     // 모든 회원 조회
     @GetMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<List<MemberEntity>> getAllmembers() {
-        List<MemberEntity> member = memberService.findAll();
-        return new ResponseEntity<List<MemberEntity>>(member, HttpStatus.OK);
+    public ResponseEntity<List<Member>> getAllmembers() {
+        List<Member> member = memberService.findAll();
+        return new ResponseEntity<List<Member>>(member, HttpStatus.OK);
     }
 
     // 회원번호로 한명의 회원 조회
     @GetMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<MemberEntity> getMember(@PathVariable("id") String id) {
-        Optional<MemberEntity> member = memberService.findById(id);
-        return new ResponseEntity<MemberEntity>(member.orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다.")), HttpStatus.OK);
+    public ResponseEntity<Member> getMember(@PathVariable("id") String id) {
+        Optional<Member> member = memberService.findById(id);
+        return new ResponseEntity<Member>(member.orElseThrow(() -> new NoSuchElementException("존재하지 않는 계정입니다.")), HttpStatus.OK);
     }
 /*
     @GetMapping(value = "/{name}", produces = { MediaType.APPLICATION_JSON_VALUE})
@@ -61,21 +61,21 @@ public class TestJpaRestController {
 
     // 회원번호로 회원 수정(mbrNo로 회원을 찾아 Member 객체의 id, name로 수정함)
     @PutMapping(value = "/{id}", produces = { MediaType.APPLICATION_JSON_VALUE })
-    public ResponseEntity<MemberEntity> updateMember(@PathVariable("id") String id, MemberEntity member) {
+    public ResponseEntity<Member> updateMember(@PathVariable("id") String id, Member member) {
         memberService.updateById(id, member);
-        return new ResponseEntity<MemberEntity>(member, HttpStatus.OK);
+        return new ResponseEntity<Member>(member, HttpStatus.OK);
     }
 
     // 회원 입력
     @PostMapping
-    public ResponseEntity<MemberEntity> save(MemberEntity member) {
-        return new ResponseEntity<MemberEntity>(memberService.save(member), HttpStatus.OK);
+    public ResponseEntity<Member> save(Member member) {
+        return new ResponseEntity<Member>(memberService.save(member), HttpStatus.OK);
     }
 
     // 회원 입력
     @RequestMapping(value="/saveMember", method = RequestMethod.GET)
-    public ResponseEntity<MemberEntity> save(HttpServletRequest req, MemberEntity member){
-        return new ResponseEntity<MemberEntity>(memberService.save(member), HttpStatus.OK);
+    public ResponseEntity<Member> save(HttpServletRequest req, Member member){
+        return new ResponseEntity<Member>(memberService.save(member), HttpStatus.OK);
     }
 
 }
