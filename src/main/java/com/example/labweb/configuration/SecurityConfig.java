@@ -42,19 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable().authorizeRequests()
                 // login 없이 접근 허용 하는 url
-                .mvcMatchers("/","/css/**","/scripts/**","/plugin/**","/fonts/**").permitAll()
-                .antMatchers("/auth/register").permitAll()
-                .antMatchers("/auth/login").permitAll()
-                .antMatchers("/api/**").permitAll()
-                // '/admin'의 경우 ADMIN 권한이 있는 사용자만 접근이 가능
-                .antMatchers("/admin").hasRole("ADMIN")
-                // 그 외 모든 요청은 인증과정 필요
-                .anyRequest().authenticated()
-                .and()
-                .logout()
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID");
+                .anyRequest().permitAll();
     }
 
     @Override

@@ -1,22 +1,25 @@
 package com.example.labweb.domain;
 
+import com.example.labweb.dto.ArticlePostRequestDTO;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.security.Principal;
 import java.time.LocalDateTime;
-// 도메인 구조 (데이터 설계)
-@Getter
-@ToString
+
 @Table(indexes = {
         @Index(columnList = "title"),
         @Index(columnList = "hashtag"),
         @Index(columnList = "createdAt"),
         @Index(columnList = "createdBy")
 })
+@Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Article {
@@ -24,6 +27,8 @@ public class Article {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false,length = 100)
+    private  String createdBy;
     @Column(nullable = false)
     private String title;
     @Column(nullable = false,length = 10000)
@@ -34,25 +39,25 @@ public class Article {
 
     private String hashtag;
 
-    @CreatedDate
     @Column(nullable = false)
-    private LocalDateTime createdAt;
-    @CreatedBy
-    @Column(nullable = false,length = 100)
-    private  String createdBy;
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
-    @LastModifiedBy
-    @Column(nullable = false,length = 100)
-    private  String modifiedBy;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @Builder
-    public Article(String title, String content, String hashtag, String category, String attached){
+    public Article(String title, String createdBy, String content, String hashtag, String category, String attached){
         this.title = title;
+        this.createdBy = createdBy;
         this.content = content;
         this.hashtag = hashtag;
         this.category = category;
         this.attached = attached;
+    }
+
+    public Article(Principal principal, ArticlePostRequestDTO request){
+        this.createdBy = principal.getName();
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.hashtag = request.getHashtag();
+        this.category = request.getCategory();
+        this.attached = request.getAttached();
     }
 }

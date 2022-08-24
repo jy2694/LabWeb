@@ -5,6 +5,7 @@ import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,11 +17,15 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@RequiredArgsConstructor
 @RestController
 public class AuthController {
 
     private final AuthService authService;
+
+    @Autowired
+    public AuthController(AuthService authService){
+        this.authService = authService;
+    }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
     @PostMapping("/auth/login")

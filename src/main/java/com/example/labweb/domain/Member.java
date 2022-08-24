@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -12,11 +13,20 @@ import javax.persistence.*;
 public class Member {
     @Id
     private String id;
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String name;
-    private String researcherId;
-    private String studentId;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
+    private String studentId;
+
+    //재학생
+    private String researcherId;
+    //줄업생
+    private String company;
+    private LocalDateTime graduateDate;
 
     @Enumerated(EnumType.STRING)
     private Role role;
