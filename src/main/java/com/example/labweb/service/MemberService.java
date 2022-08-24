@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberService {
@@ -53,5 +54,24 @@ public class MemberService {
             e.get().setEmail(member.getEmail());
             memberRepository.save(member);
         }
+    }
+
+    /*모든 졸업생 리스트 반환*/
+    public List<Member> getGraduateMembers() {
+        return memberRepository.findAll().stream()
+                .filter(member -> member.isGraduate())
+                .collect(Collectors.toList());
+    }
+    /* 모든 재학생 리스트 반환 */
+    public List<Member> getMemberRepository() {
+        return memberRepository.findAll().stream()
+                .filter(member -> !member.isGraduate())
+                .collect(Collectors.toList());
+    }
+    /* 특정 졸업생, 재학생 정보 반환  */
+    public Optional<Member> getGradateMember(String id){
+        return memberRepository.findAll().stream()
+                .filter(member -> member.getId().equals(id))
+                .findAny();
     }
 }

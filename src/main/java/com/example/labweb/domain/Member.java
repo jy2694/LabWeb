@@ -27,7 +27,8 @@ public class Member {
     private Role role;
     @Builder
     public Member(String id, String name, String password,
-                  String researcherId, String studentId, String email) {
+                  String researcherId, String studentId, String email,
+                  boolean graduate) {
         this.id = id;
         this.name = name;
         this.password = password;
@@ -35,6 +36,7 @@ public class Member {
         this.studentId = studentId;
         this.email = email;
         this.role = Role.USER;
+        this.graduate = graduate;
     }
 
     public Member(MemberSignupRequestDTO dto){
@@ -45,6 +47,7 @@ public class Member {
         this.studentId = dto.getStudentId();
         this.email = dto.getEmail();
         this.role = Role.USER;
+        this.graduate = dto.isGraduate();
     }
 
     public void encryptPassword(PasswordEncoder passwordEncoder){
