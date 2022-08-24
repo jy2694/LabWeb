@@ -4,10 +4,7 @@ import com.example.labweb.dto.MemberSignupRequestDTO;
 import lombok.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -15,13 +12,10 @@ import javax.persistence.Id;
 public class Member {
     @Id
     private String id;
+    @Column(nullable = false)
     private String password;
+    @Column(nullable = false)
     private String name;
-<<<<<<< Updated upstream
-    private String researcherId;
-    private String studentId;
-    private String email;
-=======
     @Column(nullable = false)
     private String email;
     @Column(nullable = false)
@@ -29,15 +23,8 @@ public class Member {
 
     @Column(nullable = false)
     private String researcherId;
->>>>>>> Stashed changes
-
     @Enumerated(EnumType.STRING)
     private Role role;
-
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
     @Builder
     public Member(String id, String name, String password,
                   String researcherId, String studentId, String email) {
