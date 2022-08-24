@@ -15,6 +15,9 @@ public class UserSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private String userId;
+
     @Column(nullable = false, length = 50)
     private String table;
 

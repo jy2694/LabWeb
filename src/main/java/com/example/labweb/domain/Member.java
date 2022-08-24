@@ -36,7 +36,6 @@ public class Member {
         this.studentId = studentId;
         this.email = email;
         this.role = Role.USER;
-        this.graduate = graduate;
     }
 
     public Member(MemberSignupRequestDTO dto){
@@ -47,7 +46,6 @@ public class Member {
         this.studentId = dto.getStudentId();
         this.email = dto.getEmail();
         this.role = Role.USER;
-        this.graduate = dto.isGraduate();
     }
 
     public void encryptPassword(PasswordEncoder passwordEncoder){
