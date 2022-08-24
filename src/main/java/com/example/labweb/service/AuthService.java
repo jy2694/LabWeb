@@ -13,6 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 @AllArgsConstructor
@@ -21,7 +25,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public String signup(MemberSignupRequestDTO request){
+    public Member signup(MemberSignupRequestDTO request){
         boolean exist = memberRepository.findAll().stream()
                 .filter(memberEntity -> memberEntity.getId().equals(request.getId()))
                 .count() >= 1;
@@ -29,14 +33,26 @@ public class AuthService {
         Member member = new Member(request);
         member.encryptPassword(passwordEncoder);
         memberRepository.save(member);
-        return member.getId();
+        return member;
     }
 
-    public String signin(JwtRequestDTO request) throws Exception{
+    public Member signin(JwtRequestDTO request) throws Exception{
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getID(), request.getPW()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-        return principal.getUsername();
+        Optional<Member> member = findById(principal.getUsername());
+        if(member.isPresent())
+            return member.get();
+        else
+            return null;
+    }
+
+    public Optional<Member> findById(String id){
+        return memberRepository.findAll().stream().filter(member -> member.getId().equals(id)).findAny();
+    }
+
+    public List<Member> findByName(String name){
+        return memberRepository.findAll().stream().filter(member -> member.getName().equals(name)).collect(Collectors.toList());
     }
 }
