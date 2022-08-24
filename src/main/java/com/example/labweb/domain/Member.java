@@ -17,13 +17,27 @@ public class Member {
     private String id;
     private String password;
     private String name;
+<<<<<<< Updated upstream
     private String researcherId;
     private String studentId;
     private String email;
+=======
+    @Column(nullable = false)
+    private String email;
+    @Column(nullable = false)
+    private String studentId;
+
+    @Column(nullable = false)
+    private String researcherId;
+>>>>>>> Stashed changes
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     @Builder
     public Member(String id, String name, String password,
                   String researcherId, String studentId, String email) {
