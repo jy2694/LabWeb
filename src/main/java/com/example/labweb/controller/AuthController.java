@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@RestController
+@Controller
 public class AuthController {
 
     private final AuthService authService;
@@ -29,30 +29,37 @@ public class AuthController {
     }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
-    @PostMapping("/auth/login")
-    public MemberInterface loginProcess(JwtRequestDTO dto){
+    @PostMapping("/signin")
+    public String loginProcess(Model model, JwtRequestDTO dto){
         try{
             MemberInterface member = authService.signin(dto);
-            return member;
+            return "main/index";
         } catch(UsernameNotFoundException e){
-            return null;
+            model.addAttribute("msg", "사용자가 존재하지 않습니다.");
+            model.addAttribute("url", "/");
+            return "alert";
         } catch(BadCredentialsException e){
-            return null;
+            model.addAttribute("msg", "사용자가 존재하지 않거나 비밀번호가 일치하지 않습니다.");
+            model.addAttribute("url", "/");
+            return "alert";
         } catch(Exception e){
-            return null;
+            model.addAttribute("msg", "데이터베이스 오류입니다.");
+            model.addAttribute("url", "/");
+            return "alert";
         }
     }
 
     //회원가입 페이지에서 포스트 방식으로 엔티티 전송 받으면 처리되는 메소드
-    @PostMapping("/auth/register")
-    public MemberInterface registerProcess(MemberSignupRequestDTO dto){
-        MemberInterface member;
-        if((member = authService.signup(dto)) != null)
-            return member;
-        return null;
+    @PostMapping("/signup")
+    public String registerProcess(Model model, MemberSignupRequestDTO dto){
+        if(authService.signup(dto) != null)
+            return "auth/login";
+        model.addAttribute("msg", "이미 존재하는 아이디입니다.");
+        model.addAttribute("url", "/signup");
+        return "alert";
     }
 
-    @GetMapping("logout")
+    @GetMapping("/logout")
     public String logoutPage(HttpServletRequest request, HttpServletResponse response){
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         return "redirect:/";

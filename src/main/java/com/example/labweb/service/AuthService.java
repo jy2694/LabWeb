@@ -3,10 +3,12 @@ package com.example.labweb.service;
 import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.Member;
 import com.example.labweb.domain.MemberInterface;
+import com.example.labweb.domain.ProfMember;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.MemberRepository;
+import com.example.labweb.repository.ProfMemberRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,17 +28,26 @@ import java.util.stream.Collectors;
 public class AuthService {
     private final MemberRepository memberRepository;
     private final GraduateMemberRepository graduateMemberRepository;
+    private final ProfMemberRepository profMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
     public MemberInterface signup(MemberSignupRequestDTO request){
         if(memberRepository.findById(request.getId()).isPresent()) return null;
         if(graduateMemberRepository.findById(request.getId()).isPresent()) return null;
+        if(profMemberRepository.findById(request.getId()).isPresent()) return null;
         if(request.getResearcherId() == null){
-            GraduateMember member = new GraduateMember(request);
-            member.encryptPassword(passwordEncoder);
-            graduateMemberRepository.save(member);
-            return member;
+            if(request.getStudentId() == null){
+                ProfMember member = new ProfMember(request);
+                member.encryptPassword(passwordEncoder);
+                profMemberRepository.save(member);
+                return member;
+            } else {
+                GraduateMember member = new GraduateMember(request);
+                member.encryptPassword(passwordEncoder);
+                graduateMemberRepository.save(member);
+                return member;
+            }
         } else {
             Member member = new Member(request);
             member.encryptPassword(passwordEncoder);
@@ -52,11 +63,12 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
         Optional<Member> member = memberRepository.findById(principal.getUsername());
-        Optional<GraduateMember> gmember = graduateMemberRepository.findById(principal.getUsername());
         if(member.isPresent())
             return member.get();
-        else if(gmember.isPresent())
+        Optional<GraduateMember> gmember = graduateMemberRepository.findById(principal.getUsername());
+        if(gmember.isPresent())
             return gmember.get();
-        else return null;
+        Optional<ProfMember> pmember = profMemberRepository.findById(principal.getUsername());
+        return null;
     }
 }

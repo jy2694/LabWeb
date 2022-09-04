@@ -3,8 +3,10 @@ package com.example.labweb.service;
 import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.Member;
 import com.example.labweb.domain.MemberInterface;
+import com.example.labweb.domain.ProfMember;
 import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.MemberRepository;
+import com.example.labweb.repository.ProfMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -19,15 +21,19 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 
     private final MemberRepository memberRepository;
     private final GraduateMemberRepository graduateMemberRepository;
+    private final ProfMemberRepository profMemberRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<Member> member = memberRepository.findById(username);
-        Optional<GraduateMember> gmember = graduateMemberRepository.findById(username);
         if(member.isPresent())
             return new UserDetailsImpl(member.get());
-        else if(gmember.isPresent())
+        Optional<GraduateMember> gmember = graduateMemberRepository.findById(username);
+        if(gmember.isPresent())
             return new UserDetailsImpl(gmember.get());
-        else throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
+        Optional<ProfMember> pmember = profMemberRepository.findById(username);
+        if(pmember.isPresent())
+            return new UserDetailsImpl(pmember.get());
+        throw new UsernameNotFoundException("사용자를 찾을 수 없습니다.");
     }
 }

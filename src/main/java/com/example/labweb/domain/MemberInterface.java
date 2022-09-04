@@ -13,4 +13,6 @@ public interface MemberInterface {
     String getPassword();
 
     boolean isGraduate();
+
+    boolean isProf();
 }

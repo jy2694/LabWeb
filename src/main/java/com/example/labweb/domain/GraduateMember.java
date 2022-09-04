@@ -53,4 +53,6 @@ public class GraduateMember implements MemberInterface{
     public boolean isGraduate(){
         return true;
     }
+
+    public boolean isProf(){return false;}
 }

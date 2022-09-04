@@ -1,7 +1,10 @@
 package com.example.labweb.domain;
 
 import com.example.labweb.dto.MemberSignupRequestDTO;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
@@ -9,7 +12,7 @@ import javax.persistence.*;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Member implements MemberInterface{
+public class ProfMember implements MemberInterface{
     @Id
     private String id;
     @Column(nullable = false)
@@ -18,32 +21,23 @@ public class Member implements MemberInterface{
     private String name;
     @Column(nullable = false)
     private String email;
-    @Column(nullable = false)
-    private String studentId;
-    @Column(nullable = false)
-    private String researcherId;
     @Enumerated(EnumType.STRING)
     private Role role;
     @Builder
-    public Member(String id, String name, String password,
-                  String researcherId, String studentId, String email) {
+    public ProfMember(String id, String name, String password,String email) {
         this.id = id;
         this.name = name;
         this.password = password;
-        this.researcherId = researcherId;
-        this.studentId = studentId;
         this.email = email;
-        this.role = Role.USER;
+        this.role = Role.ADMIN;
     }
 
-    public Member(MemberSignupRequestDTO dto){
+    public ProfMember(MemberSignupRequestDTO dto){
         this.id = dto.getId();
         this.name = dto.getName();
         this.password = dto.getPassword();
-        this.researcherId = dto.getResearcherId();
-        this.studentId = dto.getStudentId();
         this.email = dto.getEmail();
-        this.role = Role.USER;
+        this.role = Role.ADMIN;
     }
 
     public void encryptPassword(PasswordEncoder passwordEncoder){
@@ -51,8 +45,8 @@ public class Member implements MemberInterface{
     }
 
     public boolean isGraduate(){
-        return false;
+        return true;
     }
 
-    public boolean isProf(){return false;}
+    public boolean isProf(){return true;}
 }
