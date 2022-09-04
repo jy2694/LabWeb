@@ -12,5 +12,4 @@ public class MemberSignupRequestDTO {
     private String researcherId;
     private String studentId;
     private String email;
-    private boolean graduate;
 }

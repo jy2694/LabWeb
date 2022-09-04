@@ -55,23 +55,4 @@ public class MemberService {
             memberRepository.save(member);
         }
     }
-
-    /*모든 졸업생 리스트 반환*/
-    public List<Member> getGraduateMembers() {
-        return memberRepository.findAll().stream()
-                .filter(member -> member.isGraduate())
-                .collect(Collectors.toList());
-    }
-    /* 모든 재학생 리스트 반환 */
-    public List<Member> getMemberRepository() {
-        return memberRepository.findAll().stream()
-                .filter(member -> !member.isGraduate())
-                .collect(Collectors.toList());
-    }
-    /* 특정 졸업생, 재학생 정보 반환  */
-    public Optional<Member> getGradateMember(String id){
-        return memberRepository.findAll().stream()
-                .filter(member -> member.getId().equals(id))
-                .findAny();
-    }
 }

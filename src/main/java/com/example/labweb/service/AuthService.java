@@ -1,8 +1,11 @@
 package com.example.labweb.service;
 
+import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.Member;
+import com.example.labweb.domain.MemberInterface;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
+import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.MemberRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,37 +25,38 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class AuthService {
     private final MemberRepository memberRepository;
+    private final GraduateMemberRepository graduateMemberRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
-    public Member signup(MemberSignupRequestDTO request){
-        boolean exist = memberRepository.findAll().stream()
-                .filter(memberEntity -> memberEntity.getId().equals(request.getId()))
-                .count() >= 1;
-        if(exist) return null;
-        Member member = new Member(request);
-        member.encryptPassword(passwordEncoder);
-        memberRepository.save(member);
-        return member;
+    public MemberInterface signup(MemberSignupRequestDTO request){
+        if(memberRepository.findById(request.getId()).isPresent()) return null;
+        if(graduateMemberRepository.findById(request.getId()).isPresent()) return null;
+        if(request.getResearcherId() == null){
+            GraduateMember member = new GraduateMember(request);
+            member.encryptPassword(passwordEncoder);
+            graduateMemberRepository.save(member);
+            return member;
+        } else {
+            Member member = new Member(request);
+            member.encryptPassword(passwordEncoder);
+            memberRepository.save(member);
+            return member;
+        }
     }
 
-    public Member signin(JwtRequestDTO request) throws Exception{
+    public MemberInterface signin(JwtRequestDTO request){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getID(), request.getPW()));
+        System.out.println("SUCCESS");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-        Optional<Member> member = findById(principal.getUsername());
+        Optional<Member> member = memberRepository.findById(principal.getUsername());
+        Optional<GraduateMember> gmember = graduateMemberRepository.findById(principal.getUsername());
         if(member.isPresent())
             return member.get();
-        else
-            return null;
-    }
-
-    public Optional<Member> findById(String id){
-        return memberRepository.findAll().stream().filter(member -> member.getId().equals(id)).findAny();
-    }
-
-    public List<Member> findByName(String name){
-        return memberRepository.findAll().stream().filter(member -> member.getName().equals(name)).collect(Collectors.toList());
+        else if(gmember.isPresent())
+            return gmember.get();
+        else return null;
     }
 }

@@ -19,10 +19,11 @@ public class UserSchedule {
     private String userId;
 
     @Column(nullable = false, length = 50)
-    private String table;
+    private String timetable;
 
     @Builder
-    public UserSchedule(String table){
-        this.table =table;
+    public UserSchedule(String userId, String timetable){
+        this.userId = userId;
+        this.timetable = timetable;
     }
 }
