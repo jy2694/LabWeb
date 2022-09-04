@@ -1,5 +1,6 @@
 package com.example.labweb.service;
 
+import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.MemberRepository;
 import com.example.labweb.domain.Member;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,4 +56,6 @@ public class MemberService {
             memberRepository.save(member);
         }
     }
+
+
 }

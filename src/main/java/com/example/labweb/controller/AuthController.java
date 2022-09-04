@@ -1,10 +1,15 @@
 package com.example.labweb.controller;
 
+import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.Member;
 import com.example.labweb.domain.MemberInterface;
+import com.example.labweb.domain.ProfMember;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.service.AuthService;
+import com.example.labweb.service.GraduateMemberService;
+import com.example.labweb.service.MemberService;
+import com.example.labweb.service.ProfMemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -17,23 +22,39 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
+import java.util.Optional;
 
 @Controller
 public class AuthController {
 
     private final AuthService authService;
-
+    private GraduateMemberService graduateMemberService;
+    private MemberService memberService;
+    private ProfMemberService profMemberService;
     @Autowired
-    public AuthController(AuthService authService){
+    public AuthController(AuthService authService,
+                          GraduateMemberService graduateMemberRepository,
+                          MemberService memberRepository,
+                          ProfMemberService profMemberService){
         this.authService = authService;
+        this.graduateMemberService = graduateMemberRepository;
+        this.memberService = memberRepository;
+        this.profMemberService = profMemberService;
     }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
-    @PostMapping("/signin")
+    @PostMapping("/")
     public String loginProcess(Model model, JwtRequestDTO dto){
         try{
             MemberInterface member = authService.signin(dto);
-            return "main/index";
+            model.addAttribute("memberName", member.getName());
+            if(member instanceof Member){
+                model.addAttribute("studentId", ((Member) member).getStudentId());
+            } else if(member instanceof GraduateMember){
+                model.addAttribute("studentId", ((GraduateMember) member).getStudentId());
+            }
+            return "index";
         } catch(UsernameNotFoundException e){
             model.addAttribute("msg", "사용자가 존재하지 않습니다.");
             model.addAttribute("url", "/");
@@ -59,9 +80,45 @@ public class AuthController {
         return "alert";
     }
 
-    @GetMapping("/logout")
+    @GetMapping("/out")
     public String logoutPage(HttpServletRequest request, HttpServletResponse response){
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         return "redirect:/";
+    }
+
+    @GetMapping("/")
+    public String showLoginPage(Model model, Principal principal){
+        if(principal == null)
+            return "/auth/login";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        if(mi.isPresent()){
+            model.addAttribute("memberName", mi.get().getName());
+            model.addAttribute("studentId", mi.get().getStudentId());
+        } else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()){
+                model.addAttribute("memberName", gmi.get().getName());
+                model.addAttribute("studentId", gmi.get().getStudentId());
+            } else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                model.addAttribute("memberName", pmi.get().getName());
+            }
+        }
+       return "index";
+    }
+
+    @GetMapping({"/signup", "/signup/under"})
+    public String showRegisterPage(){
+        return "/auth/register";
+    }
+
+    @GetMapping("/signup/grad")
+    public String showGRegisterPage(){
+        return "/auth/g_register";
+    }
+
+    @GetMapping("/signup/prof")
+    public String showPRegisterPage(){
+        return "/auth/p_register";
     }
 }
