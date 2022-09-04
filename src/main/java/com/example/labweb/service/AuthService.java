@@ -59,7 +59,6 @@ public class AuthService {
     public MemberInterface signin(JwtRequestDTO request){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getID(), request.getPW()));
-        System.out.println("SUCCESS");
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
         Optional<Member> member = memberRepository.findById(principal.getUsername());
@@ -69,6 +68,8 @@ public class AuthService {
         if(gmember.isPresent())
             return gmember.get();
         Optional<ProfMember> pmember = profMemberRepository.findById(principal.getUsername());
+        if(pmember.isPresent())
+            return pmember.get();
         return null;
     }
 }
