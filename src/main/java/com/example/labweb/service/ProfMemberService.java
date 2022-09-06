@@ -2,6 +2,7 @@ package com.example.labweb.service;
 
 import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.ProfMember;
+import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.ProfMemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,15 +44,17 @@ public class ProfMemberService {
         return member;
     }
 
-    public void updateById(String id, ProfMember member) {
+    public Optional<ProfMember> updateById(String id, MemberSignupRequestDTO dto){
         Optional<ProfMember> e = profMemberRepository.findById(id);
-
-        if (e.isPresent()) {
-            e.get().setId(member.getId());
-            e.get().setName(member.getName());
-            e.get().setPassword(member.getPassword());
-            e.get().setEmail(member.getEmail());
+        e.ifPresent(member -> {
+            if(dto.getPhone() != null)
+                member.setPhone(dto.getPhone());
+            if(dto.getEmail() != null)
+                member.setEmail(dto.getEmail());
+            if(dto.getBirth() != null)
+                member.setBirth(dto.getBirth());
             profMemberRepository.save(member);
-        }
+        });
+        return e;
     }
 }

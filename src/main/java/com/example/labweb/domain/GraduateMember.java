@@ -5,9 +5,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,18 +25,26 @@ public class GraduateMember implements MemberInterface{
     @Column(nullable = false)
     private String email;
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date birth;
+    @Column(nullable = false)
     private String studentId;
+
+    @Column(nullable = false)
+    private String phone;
 
     @Enumerated(EnumType.STRING)
     private Role role;
     @Builder
     public GraduateMember(String id, String name, String password,
-                  String studentId, String email) {
+                  String studentId, String email, Date birth, String phone) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.studentId = studentId;
         this.email = email;
+        this.birth = birth;
+        this.phone = phone;
         this.role = Role.USER;
     }
 
@@ -43,6 +54,8 @@ public class GraduateMember implements MemberInterface{
         this.password = dto.getPassword();
         this.studentId = dto.getStudentId();
         this.email = dto.getEmail();
+        this.birth = dto.getBirth();
+        this.phone = dto.getPhone();
         this.role = Role.USER;
     }
 
