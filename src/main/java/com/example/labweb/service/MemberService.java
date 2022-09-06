@@ -1,5 +1,8 @@
 package com.example.labweb.service;
 
+import com.example.labweb.domain.Article;
+import com.example.labweb.dto.ArticlePostRequestDTO;
+import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.GraduateMemberRepository;
 import com.example.labweb.repository.MemberRepository;
 import com.example.labweb.domain.Member;
@@ -42,19 +45,22 @@ public class MemberService {
         memberRepository.save(member);
         return member;
     }
-
-    public void updateById(String id, Member member) {
+    public Optional<Member> updateById(String id, MemberSignupRequestDTO dto){
         Optional<Member> e = memberRepository.findById(id);
-
-        if (e.isPresent()) {
-            e.get().setId(member.getId());
-            e.get().setName(member.getName());
-            e.get().setPassword(member.getPassword());
-            e.get().setResearcherId(member.getResearcherId());
-            e.get().setStudentId(member.getStudentId());
-            e.get().setEmail(member.getEmail());
+        e.ifPresent(member -> {
+            if(dto.getStudentId() != null)
+                member.setStudentId(dto.getStudentId());
+            if(dto.getPhone() != null)
+                member.setPhone(dto.getPhone());
+            if(dto.getResearcherId() != null)
+                member.setResearcherId(dto.getResearcherId());
+            if(dto.getEmail() != null)
+                member.setEmail(dto.getEmail());
+            if(dto.getBirth() != null)
+                member.setBirth(dto.getBirth());
             memberRepository.save(member);
-        }
+        });
+        return e;
     }
 
 
