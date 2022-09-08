@@ -37,6 +37,13 @@ public class MemberService {
         return member;
     }
 
+    public Optional<Member> findByStudentId(String studentId){
+        Optional<Member> member = memberRepository.findAll().stream()
+                .filter(memberEntity -> memberEntity.getStudentId().equals(studentId))
+                .findAny();
+        return member;
+    }
+
     public void deleteById(String id) {
         memberRepository.deleteById(id);
     }

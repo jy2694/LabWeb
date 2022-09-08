@@ -11,7 +11,6 @@
 </head>
 
 <body>
-
 <div class='box'>
     <div class='box-form'>
         <div class='box-login-tab'></div>
@@ -66,7 +65,11 @@
                     <input type="text" name="email" id="email" autocapitalize="off" autocomplete="off" required>
                     <span id='valida' class='i i-close'></span>
                 </p>
-
+                <p class='field'>
+                    <label for='otp'>OTP</label>
+                    <input type="password" name="otp" id="otp" autocapitalize="off" autocomplete="off">
+                    <span id='valida' class='i i-close'></span>
+                </p>
                 <input type='submit' id='do_login' onclick="validatePassword();" value='회원가입' />
             </form>
         </div>

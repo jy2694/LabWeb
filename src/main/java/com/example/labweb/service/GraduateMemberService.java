@@ -36,6 +36,13 @@ public class GraduateMemberService {
         return member;
     }
 
+    public Optional<GraduateMember> findByStudentId(String studentId){
+        Optional<GraduateMember> member = graduateMemberRepository.findAll().stream()
+                .filter(memberEntity -> memberEntity.getStudentId().equals(studentId))
+                .findAny();
+        return member;
+    }
+
     public void deleteById(String id) {
         graduateMemberRepository.deleteById(id);
     }
