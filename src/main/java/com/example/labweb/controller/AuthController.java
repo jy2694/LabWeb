@@ -1,15 +1,10 @@
 package com.example.labweb.controller;
 
-import com.example.labweb.domain.GraduateMember;
-import com.example.labweb.domain.Member;
-import com.example.labweb.domain.MemberInterface;
-import com.example.labweb.domain.ProfMember;
+import com.example.labweb.api.GoogleOtpAPI;
+import com.example.labweb.domain.*;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
-import com.example.labweb.service.AuthService;
-import com.example.labweb.service.GraduateMemberService;
-import com.example.labweb.service.MemberService;
-import com.example.labweb.service.ProfMemberService;
+import com.example.labweb.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Controller
@@ -32,15 +28,22 @@ public class AuthController {
     private GraduateMemberService graduateMemberService;
     private MemberService memberService;
     private ProfMemberService profMemberService;
+    private ArticleService articleService;
+    private OTPDataService otpDataService;
+
     @Autowired
     public AuthController(AuthService authService,
                           GraduateMemberService graduateMemberRepository,
                           MemberService memberRepository,
-                          ProfMemberService profMemberService){
+                          ProfMemberService profMemberService,
+                          ArticleService articleService,
+                          OTPDataService otpDataService){
         this.authService = authService;
         this.graduateMemberService = graduateMemberRepository;
         this.memberService = memberRepository;
         this.profMemberService = profMemberService;
+        this.articleService = articleService;
+        this.otpDataService = otpDataService;
     }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
@@ -55,6 +58,8 @@ public class AuthController {
                 model.addAttribute("studentId", ((GraduateMember) member).getStudentId());
             }
             model.addAttribute("ROLE", member.getRole());
+            model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
+            model.addAttribute("notices", articleService.findLatestArticle("data", 5));
             return "index";
         } catch(UsernameNotFoundException e){
             model.addAttribute("msg", "사용자가 존재하지 않습니다.");
@@ -74,10 +79,16 @@ public class AuthController {
     //회원가입 페이지에서 포스트 방식으로 엔티티 전송 받으면 처리되는 메소드
     @PostMapping("/signup")
     public String registerProcess(Model model, MemberSignupRequestDTO dto){
-        if(authService.signup(dto) != null)
+        int result = 0;
+        if((result = authService.signup(dto)) == 0)
             return "auth/login";
-        model.addAttribute("msg", "이미 존재하는 아이디입니다.");
-        model.addAttribute("url", "/signup");
+        if(result == 1){
+            model.addAttribute("msg", "이미 계정이 존재합니다.");
+            model.addAttribute("url", "/signup");
+        } else if(result == 2){
+            model.addAttribute("msg", "OTP가 일치하지 않습니다.");
+            model.addAttribute("url", "/signup");
+        }
         return "alert";
     }
 
@@ -108,6 +119,8 @@ public class AuthController {
                 model.addAttribute("ROLE", pmi.get().getRole());
             }
         }
+        model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
+        model.addAttribute("notices", articleService.findLatestArticle("data", 5));
        return "index";
     }
 
@@ -124,5 +137,49 @@ public class AuthController {
     @GetMapping("/signup/prof")
     public String showPRegisterPage(){
         return "/auth/p_register";
+    }
+
+    @PostMapping("/otp")
+    public String changeOtpSettingPage(Model model, Principal principal){
+        if(principal == null)
+            return "/error/404";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        Role role;
+        if(mi.isPresent()) role = mi.get().getRole();
+        else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()) role = gmi.get().getRole();
+            else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                role = pmi.get().getRole();
+            }
+        }
+        if(otpDataService.getOTPData().isPresent() && role != Role.ADMIN)
+            return "/error/404";
+        HashMap<String, String> otpdata = GoogleOtpAPI.generate("연구실정보시스템","LABWEB");
+        otpDataService.changeOTPData(otpdata.get("key"));
+        model.addAttribute("otpUrl", otpdata.get("url"));
+        return "/auth/otp";
+    }
+
+    @GetMapping("/otp")
+    public String showOtpSettingPage(Principal principal){
+        if(principal == null)
+            return "/error/404";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        Role role;
+        if(mi.isPresent()) role = mi.get().getRole();
+        else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()) role = gmi.get().getRole();
+            else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                role = pmi.get().getRole();
+            }
+        }
+        if(!otpDataService.getOTPData().isPresent()) return "/auth/otp";
+        if(role != Role.ADMIN)
+            return "/error/404";
+        return "/auth/otp";
     }
 }

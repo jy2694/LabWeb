@@ -1,6 +1,7 @@
 package com.example.labweb.service;
 
 import com.example.labweb.domain.GraduateMember;
+import com.example.labweb.domain.Member;
 import com.example.labweb.domain.ProfMember;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.GraduateMemberRepository;

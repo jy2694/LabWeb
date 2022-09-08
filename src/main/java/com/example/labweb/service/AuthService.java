@@ -1,9 +1,7 @@
 package com.example.labweb.service;
 
-import com.example.labweb.domain.GraduateMember;
-import com.example.labweb.domain.Member;
-import com.example.labweb.domain.MemberInterface;
-import com.example.labweb.domain.ProfMember;
+import com.example.labweb.api.GoogleOtpAPI;
+import com.example.labweb.domain.*;
 import com.example.labweb.dto.JwtRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.GraduateMemberRepository;
@@ -26,34 +24,37 @@ import java.util.stream.Collectors;
 @Transactional
 @AllArgsConstructor
 public class AuthService {
-    private final MemberRepository memberRepository;
-    private final GraduateMemberRepository graduateMemberRepository;
-    private final ProfMemberRepository profMemberRepository;
+    private final MemberService memberService;
+    private final GraduateMemberService graduateMemberService;
+    private final ProfMemberService profMemberService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final OTPDataService otpDataService;
 
-    public MemberInterface signup(MemberSignupRequestDTO request){
-        if(memberRepository.findById(request.getId()).isPresent()) return null;
-        if(graduateMemberRepository.findById(request.getId()).isPresent()) return null;
-        if(profMemberRepository.findById(request.getId()).isPresent()) return null;
+    public int signup(MemberSignupRequestDTO request){
+        if(memberService.findById(request.getId()).isPresent()
+            || memberService.findByStudentId(request.getStudentId()).isPresent()) return 1;
+        if(graduateMemberService.findById(request.getId()).isPresent()
+            || graduateMemberService.findByStudentId(request.getStudentId()).isPresent()) return 1;
+        if(profMemberService.findById(request.getId()).isPresent()) return 1;
+        Optional<OTPData> otp = otpDataService.getOTPData();
+        if(otp.isPresent() && !GoogleOtpAPI.checkCode(request.getOtp(), otp.get().getOtpkey())) return 2;
         if(request.getResearcherId() == null){
             if(request.getStudentId() == null){
                 ProfMember member = new ProfMember(request);
                 member.encryptPassword(passwordEncoder);
-                profMemberRepository.save(member);
-                return member;
+                profMemberService.save(member);
             } else {
                 GraduateMember member = new GraduateMember(request);
                 member.encryptPassword(passwordEncoder);
-                graduateMemberRepository.save(member);
-                return member;
+                graduateMemberService.save(member);
             }
         } else {
             Member member = new Member(request);
             member.encryptPassword(passwordEncoder);
-            memberRepository.save(member);
-            return member;
+            memberService.save(member);
         }
+        return 0;
     }
 
     public MemberInterface signin(JwtRequestDTO request){
@@ -61,13 +62,13 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getID(), request.getPW()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
-        Optional<Member> member = memberRepository.findById(principal.getUsername());
+        Optional<Member> member = memberService.findById(principal.getUsername());
         if(member.isPresent())
             return member.get();
-        Optional<GraduateMember> gmember = graduateMemberRepository.findById(principal.getUsername());
+        Optional<GraduateMember> gmember = graduateMemberService.findById(principal.getUsername());
         if(gmember.isPresent())
             return gmember.get();
-        Optional<ProfMember> pmember = profMemberRepository.findById(principal.getUsername());
+        Optional<ProfMember> pmember = profMemberService.findById(principal.getUsername());
         if(pmember.isPresent())
             return pmember.get();
         return null;

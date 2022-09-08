@@ -19,4 +19,5 @@ public class MemberSignupRequestDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date birth;
     private String phone;
+    private String otp;
 }

@@ -4,10 +4,7 @@ import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.Member;
 import com.example.labweb.domain.ProfMember;
 import com.example.labweb.dto.MemberSignupRequestDTO;
-import com.example.labweb.service.ArticleService;
-import com.example.labweb.service.GraduateMemberService;
-import com.example.labweb.service.MemberService;
-import com.example.labweb.service.ProfMemberService;
+import com.example.labweb.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,16 +21,19 @@ public class MainController {
     private MemberService memberService;
     private ProfMemberService profMemberService;
     private ArticleService articleService;
+    private LabScheduleService labScheduleService;
 
     @Autowired
     public MainController(GraduateMemberService graduateMemberRepository,
                           MemberService memberRepository,
                           ProfMemberService profMemberService,
-                          ArticleService articleService){
+                          ArticleService articleService,
+                          LabScheduleService labScheduleService){
         this.graduateMemberService = graduateMemberRepository;
         this.memberService = memberRepository;
         this.profMemberService = profMemberService;
         this.articleService = articleService;
+        this.labScheduleService = labScheduleService;
     }
 
     @GetMapping("/contact")
@@ -172,5 +172,29 @@ public class MainController {
         }
         model.addAttribute("ID", principal.getName());
         return "main/profile";
+    }
+
+    @GetMapping("/schedule")
+    public String showScheduler(Model model, Principal principal){
+        if(principal == null) return "error/404";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        if(mi.isPresent()){
+            model.addAttribute("memberName", mi.get().getName());
+            model.addAttribute("studentId", mi.get().getStudentId());
+            model.addAttribute("ROLE", mi.get().getRole());
+        } else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()){
+                model.addAttribute("memberName", gmi.get().getName());
+                model.addAttribute("studentId", gmi.get().getStudentId());
+                model.addAttribute("ROLE", gmi.get().getRole());
+            } else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                model.addAttribute("memberName", pmi.get().getName());
+                model.addAttribute("ROLE", pmi.get().getRole());
+            }
+        }
+        model.addAttribute("schedules", labScheduleService.findAll());
+        return "main/info_schedule";
     }
 }
