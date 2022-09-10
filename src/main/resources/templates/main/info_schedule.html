@@ -180,11 +180,6 @@
           data: schedule_dic
         });
 
-
-        function change(){
-          console.log(_data);
-        }
-
         $('#scheduler').kendoScheduler({
           date: new Date(),
           height: 1000,
@@ -199,7 +194,12 @@
                 title : e.event.title,
                 description : e.event.description,
                 allDay : e.event.isAllDay
-              } );
+              },
+              function(data){
+                  e.event.id = data.id;
+              },
+              "json"
+            );
           },
           remove: function(e){
             $.post( "/schedule/delete", {

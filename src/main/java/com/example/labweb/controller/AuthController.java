@@ -30,6 +30,7 @@ public class AuthController {
     private ProfMemberService profMemberService;
     private ArticleService articleService;
     private OTPDataService otpDataService;
+    private EmployInfoService employInfoService;
 
     @Autowired
     public AuthController(AuthService authService,
@@ -37,13 +38,15 @@ public class AuthController {
                           MemberService memberRepository,
                           ProfMemberService profMemberService,
                           ArticleService articleService,
-                          OTPDataService otpDataService){
+                          OTPDataService otpDataService,
+                          EmployInfoService employInfoService){
         this.authService = authService;
         this.graduateMemberService = graduateMemberRepository;
         this.memberService = memberRepository;
         this.profMemberService = profMemberService;
         this.articleService = articleService;
         this.otpDataService = otpDataService;
+        this.employInfoService = employInfoService;
     }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
@@ -60,6 +63,7 @@ public class AuthController {
             model.addAttribute("ROLE", member.getRole());
             model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
             model.addAttribute("notices", articleService.findLatestArticle("data", 5));
+            model.addAttribute("employ", employInfoService.findAll());
             return "index";
         } catch(UsernameNotFoundException e){
             model.addAttribute("msg", "사용자가 존재하지 않습니다.");
@@ -121,6 +125,7 @@ public class AuthController {
         }
         model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
         model.addAttribute("notices", articleService.findLatestArticle("data", 5));
+        model.addAttribute("employ", employInfoService.findAll());
        return "index";
     }
 
