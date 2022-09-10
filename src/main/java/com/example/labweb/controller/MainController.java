@@ -197,4 +197,28 @@ public class MainController {
         model.addAttribute("schedules", labScheduleService.findAll());
         return "main/info_schedule";
     }
+
+    @GetMapping("/write")
+    public String showWritePage(Model model, Principal principal){
+        if(principal == null) return "error/404";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        if(mi.isPresent()){
+            model.addAttribute("memberName", mi.get().getName());
+            model.addAttribute("studentId", mi.get().getStudentId());
+            model.addAttribute("ROLE", mi.get().getRole());
+        } else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()){
+                model.addAttribute("memberName", gmi.get().getName());
+                model.addAttribute("studentId", gmi.get().getStudentId());
+                model.addAttribute("ROLE", gmi.get().getRole());
+            } else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                model.addAttribute("memberName", pmi.get().getName());
+                model.addAttribute("ROLE", pmi.get().getRole());
+            }
+        }
+        model.addAttribute("schedules", labScheduleService.findAll());
+        return "main/bbs_write";
+    }
 }
