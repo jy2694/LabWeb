@@ -146,35 +146,6 @@
 
                     <!-- Content Row -->
                     <div class="row">
-                        <div class="slide-container swiper">
-                            <div class="slide-content">
-                                <div class=" swiper-wrapper">
-                                    <div class="swiper-slide">
-                                        <div class="card-content">
-                                            <div class="card border-left-primary shadow h-100 py-2">
-                                                <div class="card-content">
-                                                    <div class="row no-gutters align-items-center">
-                                                        <div class="col mr-2">
-                                                            <img class="rounded" width="100px" height="100px" src="image/profile1.jpg">
-                                                        </div>
-                                                        <div class="col mr-2">
-                                                            <div class=" font-weight-bold text-success text-uppercase mb-1">
-                                                                박건</div>
-                                                            <div class="h6 mb-0 font-weight-bold text-gray-800">(주) 나무기술</div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                
-                            <div class="swiper-button-next swiper-navBtn"></div>
-                            <div class="swiper-button-prev swiper-navBtn"></div>
-                        </div>
-                                
-
                     <!-- Content Row -->
 
                     <div class="row">
@@ -182,8 +153,8 @@
                             <div class="card shadow mb-4">
                                 <div class="card shadow mb-0">
                                     <div class="card-body mb-1">
-                                        <video width="100%" height="350px" src="https://www.youtube.com/watch?v=KEDDgPZ_zEs" controls autoplay muted>
-
+                                        <video width="100%" height="350px" autoplay controls muted>
+                                            <source src="video/2022-09-05_pepper.mp4" ype="video/mp4">
                                         </video>
                                     </div>
                                 </div>
@@ -213,6 +184,36 @@
                                         
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="d-flex justify-content-center slide-container swiper">
+                                <div class="slide-content">
+                                    <div class=" swiper-wrapper">
+                                        <!-- -->
+                                        <div th:each="p : ${employ}" class="swiper-slide">
+                                            <div class="card-content">
+                                                <div class="card border-left-primary shadow h-100 py-2 w-75">
+                                                    <div class="card-content">
+                                                        <div class="col mr-2">
+                                                            <img class="rounded mx-auto d-block" height="75px"
+                                                                 th:attr="src='https://intra.wku.ac.kr/SWupis/ViewPicture?sNo=' + ${p.getStudentId()}">
+                                                        </div>
+                                                        <div class="col mr-2">
+                                                            <div class="font-weight-bold text-center mb-1" th:text="${p.getName()}">
+                                                                이름</div>
+                                                            <div class="h6 mb-0 font-weight-bold text-center text-gray-800" th:text="${p.getCompany()}"></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- -->
+                                    </div>
+                                </div>
+
+                                <div class="swiper-button-next swiper-navBtn"></div>
+                                <div class="swiper-button-prev swiper-navBtn"></div>
                             </div>
                         </div>
                         <div class="col-xl-6 col-lg-4">

@@ -19,6 +19,7 @@ public class ScheduleController {
     @PostMapping("/schedule")
     @ResponseBody
     public LabSchedule writeSchedule(CreateScheduleDTO dto){
+        System.out.println(dto.getId());
         if(dto.getId() == null || dto.getId() == 0)
             return labScheduleService.save(dto);
         else {

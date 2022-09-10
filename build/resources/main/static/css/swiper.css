@@ -23,7 +23,7 @@ body{
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 14px;
+  padding: 10px 5px;
 }
 .image-content{
   position: relative;
