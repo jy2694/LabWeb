@@ -14,12 +14,12 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.security.Principal;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 public class AuthController {
@@ -31,6 +31,19 @@ public class AuthController {
     private ArticleService articleService;
     private OTPDataService otpDataService;
     private EmployInfoService employInfoService;
+    private ProjectScheduleService projectScheduleService;
+    private final String[] colorSet = {
+            "bg-info",
+            "bg-primary",
+            "bg-success",
+            "bg-warning",
+            "bg-danger"
+    };
+    private final String[] video_list = {
+            "2022-08-13_capstone.mp4",
+            "2022-09-05_pepper.mp4"
+    };
+    private final Random random = new Random();
 
     @Autowired
     public AuthController(AuthService authService,
@@ -39,7 +52,8 @@ public class AuthController {
                           ProfMemberService profMemberService,
                           ArticleService articleService,
                           OTPDataService otpDataService,
-                          EmployInfoService employInfoService){
+                          EmployInfoService employInfoService,
+                          ProjectScheduleService projectScheduleService){
         this.authService = authService;
         this.graduateMemberService = graduateMemberRepository;
         this.memberService = memberRepository;
@@ -47,51 +61,67 @@ public class AuthController {
         this.articleService = articleService;
         this.otpDataService = otpDataService;
         this.employInfoService = employInfoService;
+        this.projectScheduleService = projectScheduleService;
     }
 
     //로그인 페이지에서 포스트 방식으로 ID, PW 전송 받으면 처리되는 메소드
     @PostMapping("/")
-    public String loginProcess(Model model, JwtRequestDTO dto){
+    public String loginProcess(Model rttr, JwtRequestDTO dto){
         try{
             MemberInterface member = authService.signin(dto);
-            model.addAttribute("memberName", member.getName());
+            rttr.addAttribute("memberName", member.getName());
             if(member instanceof Member){
-                model.addAttribute("studentId", ((Member) member).getStudentId());
+                rttr.addAttribute("studentId", ((Member) member).getStudentId());
             } else if(member instanceof GraduateMember){
-                model.addAttribute("studentId", ((GraduateMember) member).getStudentId());
+                rttr.addAttribute("studentId", ((GraduateMember) member).getStudentId());
             }
-            model.addAttribute("ROLE", member.getRole());
-            model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
-            model.addAttribute("notices", articleService.findLatestArticle("data", 5));
-            model.addAttribute("employ", employInfoService.findAll());
-            return "index";
+            rttr.addAttribute("ROLE", member.getRole());
+
+            //BBS Data
+            rttr.addAttribute("datas", articleService.findLatestArticle("data", 5));
+            rttr.addAttribute("notices", articleService.findLatestArticle("notice", 5));
+            rttr.addAttribute("employ", employInfoService.findAll());
+
+            rttr.addAttribute("video", video_list[random.nextInt(video_list.length)]);
+
+            //Research Data
+            List<ProjectSchedule> projectScheduleList = projectScheduleService.findAll();
+
+            HashMap<String, String> color = new HashMap<>();
+            for(ProjectSchedule schedule : projectScheduleList){
+                color.put(schedule.getTitle(), colorSet[random.nextInt(colorSet.length)]);
+            }
+            rttr.addAttribute("color", color);
+            rttr.addAttribute("projects", projectScheduleList);
+
+            return "redirect:/";
         } catch(UsernameNotFoundException e){
-            model.addAttribute("msg", "사용자가 존재하지 않습니다.");
-            model.addAttribute("url", "/");
+            rttr.addAttribute("msg", "사용자가 존재하지 않습니다.");
+            rttr.addAttribute("url", "/");
             return "alert";
         } catch(BadCredentialsException e){
-            model.addAttribute("msg", "사용자가 존재하지 않거나 비밀번호가 일치하지 않습니다.");
-            model.addAttribute("url", "/");
+            rttr.addAttribute("msg", "사용자가 존재하지 않거나 비밀번호가 일치하지 않습니다.");
+            rttr.addAttribute("url", "/");
             return "alert";
         } catch(Exception e){
-            model.addAttribute("msg", "데이터베이스 오류입니다.");
-            model.addAttribute("url", "/");
+            rttr.addAttribute("msg", "데이터베이스 오류입니다.");
+            rttr.addAttribute("url", "/");
             return "alert";
         }
     }
 
     //회원가입 페이지에서 포스트 방식으로 엔티티 전송 받으면 처리되는 메소드
     @PostMapping("/signup")
-    public String registerProcess(Model model, MemberSignupRequestDTO dto){
+    public String registerProcess(Model rttr, MemberSignupRequestDTO dto){
         int result = 0;
         if((result = authService.signup(dto)) == 0)
-            return "auth/login";
+            return "redirect:/";
         if(result == 1){
-            model.addAttribute("msg", "이미 계정이 존재합니다.");
-            model.addAttribute("url", "/signup");
+            rttr.addAttribute("msg", "이미 계정이 존재합니다.");
+            rttr.addAttribute("url", "/signup");
         } else if(result == 2){
-            model.addAttribute("msg", "OTP가 일치하지 않습니다.");
-            model.addAttribute("url", "/signup");
+            rttr.addAttribute("msg", "OTP가 일치하지 않습니다.");
+            rttr.addAttribute("url", "/signup");
         }
         return "alert";
     }
@@ -123,9 +153,21 @@ public class AuthController {
                 model.addAttribute("ROLE", pmi.get().getRole());
             }
         }
-        model.addAttribute("datas", articleService.findLatestArticle("notice", 5));
-        model.addAttribute("notices", articleService.findLatestArticle("data", 5));
+        model.addAttribute("datas", articleService.findLatestArticle("data", 5));
+        model.addAttribute("notices", articleService.findLatestArticle("notice", 5));
         model.addAttribute("employ", employInfoService.findAll());
+
+        model.addAttribute("video", video_list[random.nextInt(video_list.length)]);
+
+        //Research Data
+        List<ProjectSchedule> projectScheduleList = projectScheduleService.findAll();
+
+        HashMap<String, String> color = new HashMap<>();
+        for(ProjectSchedule schedule : projectScheduleList){
+            color.put(schedule.getTitle(), colorSet[random.nextInt(colorSet.length)]);
+        }
+        model.addAttribute("color", color);
+        model.addAttribute("projects", projectScheduleList);
        return "index";
     }
 
@@ -145,7 +187,7 @@ public class AuthController {
     }
 
     @PostMapping("/otp")
-    public String changeOtpSettingPage(Model model, Principal principal){
+    public String changeOtpSettingPage(RedirectAttributes rttr, Principal principal){
         if(principal == null)
             return "/error/404";
         Optional<Member> mi = memberService.findById(principal.getName());
@@ -163,8 +205,8 @@ public class AuthController {
             return "/error/404";
         HashMap<String, String> otpdata = GoogleOtpAPI.generate("연구실정보시스템","LABWEB");
         otpDataService.changeOTPData(otpdata.get("key"));
-        model.addAttribute("otpUrl", otpdata.get("url"));
-        return "/auth/otp";
+        rttr.addAttribute("otpUrl", otpdata.get("url"));
+        return "redirect:/otp";
     }
 
     @GetMapping("/otp")

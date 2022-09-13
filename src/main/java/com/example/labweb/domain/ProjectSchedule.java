@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,26 +18,21 @@ public class ProjectSchedule {
 
     /*일정시작 시간*/
     @Column(nullable = false)
-    private String start;
+    private Date start;
     /*일정종료 시간*/
     @Column(nullable = false)
-    private String end;
+    private Date end;
     /*일정 제목*/
     @Column(nullable = false)
     private String title;
-    /*일정 내용*/
-    @Column(nullable = false,length = 10000)
-    private String content;
     /*일정 참여 인원*/
     @Column(nullable = false)
     private String personnel;
 
-    public ProjectSchedule(String start, String end, String title, String content, String personnel){
-        this.start =start;
-        this.end = end ;
+    public ProjectSchedule(Date start, Date end, String title, String personnel){
+        this.start = start;
+        this.end = end;
         this.title = title;
-        this.content = content;
         this.personnel = personnel;
-
     }
 }

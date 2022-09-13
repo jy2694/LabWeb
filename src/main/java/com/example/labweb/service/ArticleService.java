@@ -1,17 +1,24 @@
 package com.example.labweb.service;
 
+import com.example.labweb.configuration.StorageProperties;
 import com.example.labweb.domain.Article;
+import com.example.labweb.domain.Attachment;
 import com.example.labweb.dto.ArticlePostRequestDTO;
 import com.example.labweb.repository.ArticleRepository;
+import com.example.labweb.repository.AttachmentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,16 +26,50 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ArticleService {
     private ArticleRepository articleRepository;
-
+    private AttachmentRepository attachmentRepository;
+    private StorageProperties properties;
     public Article postArticle(Principal principal, ArticlePostRequestDTO request){
-        Article article = new Article(principal, request);
-        return save(article);
+        try{
+            Article article = new Article(principal, request);
+            articleRepository.save(article);
+            if(request.getAttached() != null){
+                for(MultipartFile file : request.getAttached()){
+                    if(file.isEmpty()) continue;
+                    String fileName = file.getOriginalFilename();
+                    String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    String originPath = UUID.randomUUID().toString().replaceAll("-","") + fileExtension;
+                    Long fileSize = file.getSize();
+
+                    Path destinationFile = Paths.get(properties.getLocation()).resolve(
+                                    Paths.get(originPath))
+                            .normalize().toAbsolutePath();
+                    try (InputStream inputStream = file.getInputStream()) {
+                        Files.copy(inputStream, destinationFile,
+                                StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    attachmentRepository.save(new Attachment(
+                            article.getId(),
+                            fileName,
+                            fileExtension,
+                            originPath,
+                            fileSize
+                    ));
+                }
+            }
+            return article;
+        } catch(IOException e){
+            return null;
+        }
     }
 
     public List<Article> findAll(String category){
         return articleRepository.findAll().stream()
                 .filter(article -> article.getCategory().equals(category))
                 .collect(Collectors.toList());
+    }
+
+    public List<Attachment> findAttachmentByBoardId(Long boardId){
+        return attachmentRepository.findByBoardId(boardId);
     }
 
     public Optional<Article> findById(Long id){
@@ -59,10 +100,22 @@ public class ArticleService {
     }
 
     public void deleteById(Long id){
+        for(Attachment attachment : attachmentRepository.findByBoardId(id))
+            deleteAttachment(attachment.getId());
         articleRepository.deleteById(id);
     }
 
-    public Optional<Article> updateById(Long id, ArticlePostRequestDTO dto){
+    public void deleteAttachment(Long id){
+        Optional<Attachment> optionalAttachment = attachmentRepository.findById(id);
+        if(optionalAttachment.isEmpty())return;
+        Path destinationFile = Paths.get(properties.getLocation()).resolve(
+                        Paths.get(optionalAttachment.get().getOriginPath()))
+                .normalize().toAbsolutePath();
+        destinationFile.toFile().delete();
+        attachmentRepository.deleteById(id);
+    }
+
+    public Optional<Article> updateById(Long id, ArticlePostRequestDTO dto, String[] exist){
         Optional<Article> e = articleRepository.findById(id);
         e.ifPresent(article -> {
             if(dto.getTitle() != null)
@@ -71,12 +124,51 @@ public class ArticleService {
                 article.setCategory(dto.getCategory());
             if(dto.getContent() != null)
                 article.setContent(dto.getContent());
-            if(dto.getAttached() != null)
-                article.setAttached(dto.getAttached());
-            if(dto.getHashtag() != null)
-                article.setHashtag(dto.getHashtag());
             articleRepository.save(article);
         });
+
+        List<Attachment> now = attachmentRepository.findByBoardId(id);
+        for(Attachment attachment : now){
+            if(exist != null) {
+                if (!isContained(exist, attachment))
+                    deleteAttachment(attachment.getId());
+            } else deleteAttachment(attachment.getId());
+        }
+        try{
+            if(dto.getAttached() != null){
+                for(MultipartFile file : dto.getAttached()){
+                    if(file.isEmpty()) continue;
+                    String fileName = file.getOriginalFilename();
+                    String fileExtension = fileName.substring(fileName.lastIndexOf("."));
+                    String originPath = UUID.randomUUID().toString().replaceAll("-","") + fileExtension;
+                    Long fileSize = file.getSize();
+
+                    Path destinationFile = Paths.get(properties.getLocation()).resolve(
+                                    Paths.get(originPath))
+                            .normalize().toAbsolutePath();
+                    try (InputStream inputStream = file.getInputStream()) {
+                        Files.copy(inputStream, destinationFile,
+                                StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    attachmentRepository.save(new Attachment(
+                            id,
+                            fileName,
+                            fileExtension,
+                            originPath,
+                            fileSize
+                    ));
+                }
+            }
+        } catch(Exception e1){
+            return null;
+        }
         return e;
+    }
+
+    private boolean isContained(String[] exist, Attachment attachment){
+        for(String line : exist)
+            if(Integer.parseInt(line) == attachment.getId())
+                return true;
+        return false;
     }
 }
