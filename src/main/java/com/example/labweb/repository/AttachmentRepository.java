@@ -13,4 +13,7 @@ public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
 
     @Query(value = "select * from attachment where board_id = :id", nativeQuery = true)
     public List<Attachment> findByBoardId(@Param(value = "id") Long id);
+
+    @Query(value = "select * from attachment where origin_path = :path", nativeQuery = true)
+    public List<Attachment> findByOriginPath(@Param(value = "path") String path);
 }

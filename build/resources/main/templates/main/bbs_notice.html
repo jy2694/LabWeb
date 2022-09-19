@@ -22,7 +22,11 @@
 
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
+    <script th:inline="javascript">
+        function gotoArticle(category, id){
+            location.href="/show?category="+category+"&id=" + id;
+        }
+    </script>
 </head>
 
 <body id="page-top" oncontextmenu='return false' onselectstart='return false' ondragstart='return false'>
@@ -154,7 +158,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <tr th:each="article : ${articles}">
+                                    <tr
+                                            th:each="article : ${articles}"
+                                            th:artid="${article.getId()}"
+                                            th:category="${category}"
+                                            th:onclick="gotoArticle(this.getAttribute('category'), this.getAttribute('artid'))">
                                         <td th:text="${article.getId()}"></td>
                                         <td th:text="${article.getTitle()}"></td>
                                         <td th:text="${article.getCreatedBy()}"></td>

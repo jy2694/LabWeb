@@ -2,12 +2,6 @@ package com.example.labweb.domain;
 
 import com.example.labweb.dto.ArticlePostRequestDTO;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.security.Principal;

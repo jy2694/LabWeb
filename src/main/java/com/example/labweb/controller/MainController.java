@@ -1,22 +1,22 @@
 package com.example.labweb.controller;
 
-import com.example.labweb.domain.Article;
-import com.example.labweb.domain.GraduateMember;
-import com.example.labweb.domain.Member;
-import com.example.labweb.domain.ProfMember;
+import com.example.labweb.domain.*;
 import com.example.labweb.dto.ArticlePostRequestDTO;
 import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -66,9 +66,10 @@ public class MainController {
         return "main/info_contact";
     }
 
-    @GetMapping("/notice")
-    public String showNotice(Model model, Principal principal){
+    @GetMapping("/{category}")
+    public String showNotice(@PathVariable String category, Model model, Principal principal){
         if(principal == null) return "error/404";
+        if(!category.equals("notice") && !category.equals("data")) return "redirect:/";
         Optional<Member> mi = memberService.findById(principal.getName());
         if(mi.isPresent()){
             model.addAttribute("memberName", mi.get().getName());
@@ -86,32 +87,11 @@ public class MainController {
                 model.addAttribute("ROLE", pmi.get().getRole());
             }
         }
-        model.addAttribute("articles", articleService.findAll("notice"));
-        return "main/bbs_notice";
-    }
-
-    @GetMapping("/data")
-    public String showData(Model model, Principal principal){
-        if(principal == null) return "error/404";
-        Optional<Member> mi = memberService.findById(principal.getName());
-        if(mi.isPresent()){
-            model.addAttribute("memberName", mi.get().getName());
-            model.addAttribute("studentId", mi.get().getStudentId());
-            model.addAttribute("ROLE", mi.get().getRole());
-        } else {
-            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
-            if(gmi.isPresent()){
-                model.addAttribute("memberName", gmi.get().getName());
-                model.addAttribute("studentId", gmi.get().getStudentId());
-                model.addAttribute("ROLE", gmi.get().getRole());
-            } else {
-                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
-                model.addAttribute("memberName", pmi.get().getName());
-                model.addAttribute("ROLE", pmi.get().getRole());
-            }
-        }
-        model.addAttribute("articles", articleService.findAll("data"));
-        return "main/bbs_refer";
+        model.addAttribute("category", category);
+        model.addAttribute("articles", articleService.findAll(category));
+        if(category.equals("notice"))
+            return "main/bbs_notice";
+        else return "main/bbs_refer";
     }
 
     @GetMapping("/profile")
@@ -207,29 +187,36 @@ public class MainController {
     public String showWritePage(Model model, Principal principal, @RequestParam("category") String category, @RequestParam("id") String id){
         if(principal == null) return "error/404";
         Optional<Member> mi = memberService.findById(principal.getName());
+        String name, studentId = null;
+        Role role;
         if(mi.isPresent()){
-            model.addAttribute("memberName", mi.get().getName());
-            model.addAttribute("studentId", mi.get().getStudentId());
-            model.addAttribute("ROLE", mi.get().getRole());
+            name = mi.get().getName();
+            studentId = mi.get().getStudentId();
+            role = mi.get().getRole();
         } else {
             Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
             if(gmi.isPresent()){
-                model.addAttribute("memberName", gmi.get().getName());
-                model.addAttribute("studentId", gmi.get().getStudentId());
-                model.addAttribute("ROLE", gmi.get().getRole());
+                name = gmi.get().getName();
+                studentId = gmi.get().getStudentId();
+                role = gmi.get().getRole();
             } else {
                 Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
-                model.addAttribute("memberName", pmi.get().getName());
-                model.addAttribute("ROLE", pmi.get().getRole());
+                name = pmi.get().getName();
+                role = pmi.get().getRole();
             }
         }
         model.addAttribute("category", category);
         try{
            Long idx = Long.parseLong(id);
-
-
            Optional<Article> article = articleService.findById(idx);
            if(article.isPresent()){
+
+               if(!role.equals(Role.ADMIN) && !article.get().getCreatedBy().equals(principal.getName())){
+                   model.addAttribute("msg", "권한이 없습니다.");
+                   model.addAttribute("url", "/");
+                   return "alert";
+               }
+
                model.addAttribute("title", article.get().getTitle());
                model.addAttribute("content", article.get().getContent());
                model.addAttribute("files", articleService.findAttachmentByBoardId(article.get().getId()));
@@ -240,6 +227,10 @@ public class MainController {
         } catch(Exception e){
             model.addAttribute("id", "new");
         }
+        model.addAttribute("memberName", name);
+        if(studentId != null)
+            model.addAttribute("studentId", studentId);
+        model.addAttribute("ROLE", role);
         model.addAttribute("schedules", labScheduleService.findAll());
         return "main/bbs_write";
     }
@@ -247,15 +238,67 @@ public class MainController {
     @PostMapping("write")
     public String writeArticle(Model model, Principal principal, String[] exist, Long id, ArticlePostRequestDTO dto){
         if(principal == null) return "redirect:/";
+        Optional<Member> mi = memberService.findById(principal.getName());
+        String name, studentId = null;
+        Role role;
+        if(mi.isPresent()){
+            name = mi.get().getName();
+            studentId = mi.get().getStudentId();
+            role = mi.get().getRole();
+        } else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()){
+                name = gmi.get().getName();
+                studentId = gmi.get().getStudentId();
+                role = gmi.get().getRole();
+            } else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                name = pmi.get().getName();
+                role = pmi.get().getRole();
+            }
+        }
+
         //Post Article
 
         if(id == null)
             articleService.postArticle(principal, dto);
-        else
-            articleService.updateById(id, dto, exist);
+        else{
+            Optional<Article> articleOptional = articleService.findById(id);
+            if(articleOptional.isEmpty())
+                articleService.postArticle(principal, dto);
+            else {
+                if(!role.equals(Role.ADMIN) && !articleOptional.get().getCreatedBy().equals(principal.getName())){
+                    model.addAttribute("msg", "권한이 없습니다.");
+                    model.addAttribute("url", "/");
+                    return "alert";
+                }
+                articleService.updateById(id, dto, exist);
+            }
+        }
 
 
-        //Member Info
+
+
+        model.addAttribute("memberName", name);
+        if(studentId != null)
+            model.addAttribute("studentId", studentId);
+        model.addAttribute("ROLE", role);
+        model.addAttribute("articles", articleService.findAll(dto.getCategory()));
+        return "redirect:/" + dto.getCategory();
+    }
+
+    @GetMapping("/show")
+    public String showArticle(@RequestParam("category") String category, @RequestParam("id") Long id,  Model model, Principal principal){
+        if(principal == null)
+            return "redirect:/";
+        model.addAttribute("memberId", principal.getName());
+        Optional<Article> articleOptional = articleService.findById(id);
+        if(articleOptional.isEmpty()){
+            model.addAttribute("msg", "글이 삭제되었거나 존재하지 않습니다.");
+            model.addAttribute("url", "/");
+            return "alert";
+        }
+
         Optional<Member> mi = memberService.findById(principal.getName());
         if(mi.isPresent()){
             model.addAttribute("memberName", mi.get().getName());
@@ -273,7 +316,66 @@ public class MainController {
                 model.addAttribute("ROLE", pmi.get().getRole());
             }
         }
-        model.addAttribute("articles", articleService.findAll(dto.getCategory()));
-        return "redirect:/" + dto.getCategory();
+
+        List<Attachment> attachmentList = articleService.findAttachmentByBoardId(id);
+        Article article = articleOptional.get();
+        model.addAttribute("title", article.getTitle());
+        model.addAttribute("content", article.getContent());
+        model.addAttribute("author", article.getCreatedBy());
+        model.addAttribute("files", attachmentList);
+        model.addAttribute("id", id);
+        model.addAttribute("category", category);
+        return "main/bbs_content";
     }
+
+    @GetMapping("/delete")
+    public String deleteArticle(@RequestParam("category") String category, @RequestParam("id") Long id, Model model, Principal principal){
+        if(principal == null)
+            return "redirect:/";
+        Optional<Article> articleOptional = articleService.findById(id);
+        if(articleOptional.isEmpty()){
+            model.addAttribute("msg", "글이 삭제되었거나 존재하지 않습니다.");
+            model.addAttribute("url", "/" + category);
+            return "alert";
+        }
+
+        Optional<Member> mi = memberService.findById(principal.getName());
+        Role role;
+        if(mi.isPresent()){
+            role = mi.get().getRole();
+        } else {
+            Optional<GraduateMember> gmi = graduateMemberService.findById(principal.getName());
+            if(gmi.isPresent()){
+                role = gmi.get().getRole();
+            } else {
+                Optional<ProfMember> pmi = profMemberService.findById(principal.getName());
+                role = pmi.get().getRole();
+            }
+        }
+
+        if(!role.equals(Role.ADMIN) && !articleOptional.get().getCreatedBy().equals(principal.getName())){
+            model.addAttribute("msg", "권한이 없습니다.");
+            model.addAttribute("url", "/show?category=" + category + "&id=" + id);
+            return "alert";
+        }
+
+        articleService.deleteById(id);
+
+        return "redirect:/" + category;
+    }
+
+    @GetMapping("/files/{filename:.+}")
+    @ResponseBody
+    public ResponseEntity<Resource> serveFile(HttpServletRequest request, @PathVariable String filename) {
+        Attachment attachments = articleService.findByOriginPath(filename);
+        Resource file = articleService.loadAsResource(filename);
+        String userAgent = request.getHeader("User-Agent");
+        if(userAgent.indexOf("Trident") > -1)
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + URLEncoder.encode(attachments.getFileName(),StandardCharsets.UTF_8).replaceAll("\\+", "%20") + "\"").body(file);
+        else
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + new String(attachments.getFileName().getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"").body(file);
+    }
+
 }

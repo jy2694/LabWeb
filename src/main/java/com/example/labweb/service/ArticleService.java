@@ -7,12 +7,15 @@ import com.example.labweb.dto.ArticlePostRequestDTO;
 import com.example.labweb.repository.ArticleRepository;
 import com.example.labweb.repository.AttachmentRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -163,6 +166,25 @@ public class ArticleService {
             return null;
         }
         return e;
+    }
+
+    public Attachment findByOriginPath(String path){
+        List<Attachment> attachments = attachmentRepository.findByOriginPath(path);
+        if(attachments.size() == 0) return null;
+        return attachments.get(0);
+    }
+
+    public Resource loadAsResource(String filename){
+        try {
+            Path file = Paths.get(properties.getLocation()).resolve(filename);
+            Resource resource = new UrlResource(file.toUri());
+            if (resource.exists() || resource.isReadable())
+                return resource;
+            else
+                return null;
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
 
     private boolean isContained(String[] exist, Attachment attachment){
