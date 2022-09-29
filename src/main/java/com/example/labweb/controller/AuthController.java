@@ -135,7 +135,7 @@ public class AuthController {
     @GetMapping("/")
     public String showLoginPage(Model model, Principal principal){
         if(principal == null)
-            return "/auth/login";
+            return "auth/login";
         Optional<Member> mi = memberService.findById(principal.getName());
         if(mi.isPresent()){
             model.addAttribute("memberName", mi.get().getName());
@@ -189,7 +189,7 @@ public class AuthController {
     @PostMapping("/otp")
     public String changeOtpSettingPage(RedirectAttributes rttr, Principal principal){
         if(principal == null)
-            return "/error/404";
+            return "error/404";
         Optional<Member> mi = memberService.findById(principal.getName());
         Role role;
         if(mi.isPresent()) role = mi.get().getRole();
@@ -202,7 +202,7 @@ public class AuthController {
             }
         }
         if(otpDataService.getOTPData().isPresent() && role != Role.ADMIN)
-            return "/error/404";
+            return "error/404";
         HashMap<String, String> otpdata = GoogleOtpAPI.generate("연구실정보시스템","LABWEB");
         otpDataService.changeOTPData(otpdata.get("key"));
         rttr.addAttribute("otpUrl", otpdata.get("url"));
@@ -212,7 +212,7 @@ public class AuthController {
     @GetMapping("/otp")
     public String showOtpSettingPage(Principal principal){
         if(principal == null)
-            return "/error/404";
+            return "error/404";
         Optional<Member> mi = memberService.findById(principal.getName());
         Role role;
         if(mi.isPresent()) role = mi.get().getRole();
@@ -226,7 +226,7 @@ public class AuthController {
         }
         if(!otpDataService.getOTPData().isPresent()) return "/auth/otp";
         if(role != Role.ADMIN)
-            return "/error/404";
-        return "/auth/otp";
+            return "error/404";
+        return "auth/otp";
     }
 }
