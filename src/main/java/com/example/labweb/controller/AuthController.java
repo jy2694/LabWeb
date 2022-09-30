@@ -173,17 +173,17 @@ public class AuthController {
 
     @GetMapping({"/signup", "/signup/under"})
     public String showRegisterPage(){
-        return "/auth/register";
+        return "auth/register";
     }
 
     @GetMapping("/signup/grad")
     public String showGRegisterPage(){
-        return "/auth/g_register";
+        return "auth/g_register";
     }
 
     @GetMapping("/signup/prof")
     public String showPRegisterPage(){
-        return "/auth/p_register";
+        return "auth/p_register";
     }
 
     @PostMapping("/otp")
@@ -224,7 +224,7 @@ public class AuthController {
                 role = pmi.get().getRole();
             }
         }
-        if(!otpDataService.getOTPData().isPresent()) return "/auth/otp";
+        if(!otpDataService.getOTPData().isPresent()) return "auth/otp";
         if(role != Role.ADMIN)
             return "error/404";
         return "auth/otp";
