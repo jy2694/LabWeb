@@ -14,19 +14,19 @@ public class EmployInfo {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     private Long id;
-
     @Column(nullable = false)
     private String name;
     @Column(nullable = false)
-    private String studentId;
-    @Column(nullable = false)
     private String company;
 
+    @Column(nullable = false)
+    private String profileName;
+
     @Builder
-    public EmployInfo(Long id, String name, String studentId, String company){
+    public EmployInfo(Long id, String name, String company, String profileName){
         this.id = id;
         this.name = name;
-        this.studentId = studentId;
         this.company = company;
+        this.profileName = profileName;
     }
 }

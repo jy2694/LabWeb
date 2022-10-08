@@ -1,6 +1,5 @@
 package com.example.labweb.repository;
 
-import com.example.labweb.domain.GraduateMember;
 import com.example.labweb.domain.LabSchedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

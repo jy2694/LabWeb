@@ -7,4 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Getter
 public class StorageProperties {
     private String location = "attached-files";
+    private String profile_location = "profiles";
 }

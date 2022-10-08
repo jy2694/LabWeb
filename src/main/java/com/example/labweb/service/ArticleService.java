@@ -31,9 +31,9 @@ public class ArticleService {
     private ArticleRepository articleRepository;
     private AttachmentRepository attachmentRepository;
     private StorageProperties properties;
-    public Article postArticle(Principal principal, ArticlePostRequestDTO request){
+    public Article postArticle(ArticlePostRequestDTO request){
         try{
-            Article article = new Article(principal, request);
+            Article article = new Article(request);
             articleRepository.save(article);
             if(request.getAttached() != null){
                 for(MultipartFile file : request.getAttached()){
@@ -77,13 +77,6 @@ public class ArticleService {
 
     public Optional<Article> findById(Long id){
         return articleRepository.findById(id);
-    }
-
-    public List<Article> findByContainedString(String category, String string){
-        return articleRepository.findAll().stream()
-                .filter(article -> article.getCategory().equals(category))
-                .filter(article -> article.getContent().contains(string))
-                .collect(Collectors.toList());
     }
 
     public List<Article> findLatestArticle(String category, int count){
