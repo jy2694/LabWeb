@@ -13,8 +13,11 @@ import java.util.Optional;
 @Controller
 public class ScheduleController {
 
-    @Autowired
     private LabScheduleService labScheduleService;
+
+    public ScheduleController(LabScheduleService labScheduleService){
+        this.labScheduleService = labScheduleService;
+    }
 
     @PostMapping("/schedule")
     @ResponseBody

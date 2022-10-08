@@ -22,6 +22,7 @@ public class LabwebApplication {
 	CommandLineRunner init(StorageProperties properties) {
 		return (args) -> {
 			Files.createDirectories(Paths.get(properties.getLocation()));
+			Files.createDirectories(Paths.get(properties.getProfile_location()));
 		};
 	}
 }

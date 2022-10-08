@@ -4,7 +4,6 @@ import com.example.labweb.dto.ArticlePostRequestDTO;
 import lombok.*;
 
 import javax.persistence.*;
-import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Data
@@ -27,18 +26,24 @@ public class Article {
     @Column(nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(nullable = false)
+    private String password;
+
     @Builder
-    public Article(String title, String createdBy, String content, String category){
+    public Article(String title, String createdBy, String content, String category, String writer, String password){
         this.title = title;
         this.createdBy = createdBy;
         this.content = content;
         this.category = category;
+        this.createdBy = writer;
+        this.password = password;
     }
 
-    public Article(Principal principal, ArticlePostRequestDTO request){
-        this.createdBy = principal.getName();
+    public Article(ArticlePostRequestDTO request){
+        this.createdBy = request.getWriter();
         this.title = request.getTitle();
         this.content = request.getContent();
         this.category = request.getCategory();
+        this.password = request.getPassword();
     }
 }

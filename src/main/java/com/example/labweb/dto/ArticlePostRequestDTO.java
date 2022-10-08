@@ -11,4 +11,6 @@ public class ArticlePostRequestDTO {
     private String content;
     private String category;
     private MultipartFile[] attached;
+    private String writer;
+    private String password;
 }

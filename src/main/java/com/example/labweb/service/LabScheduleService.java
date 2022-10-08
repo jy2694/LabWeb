@@ -1,9 +1,7 @@
 package com.example.labweb.service;
 
 import com.example.labweb.domain.LabSchedule;
-import com.example.labweb.domain.ProfMember;
 import com.example.labweb.dto.CreateScheduleDTO;
-import com.example.labweb.dto.MemberSignupRequestDTO;
 import com.example.labweb.repository.LabScheduleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

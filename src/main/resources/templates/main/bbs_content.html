@@ -101,34 +101,6 @@
                     <i class="fa fa-bars"></i>
                 </button>
 
-
-
-                <!-- Topbar Navbar -->
-                <ul class="navbar-nav ml-auto">
-                    <!-- Nav Item - User Information -->
-                    <li class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="mr-2 d-none d-lg-inline text-gray-600 small" th:text="${memberName}"></span>
-                            <img class="img-profile rounded-circle" th:if="${studentId != null}" th:attr="src='https://intra.wku.ac.kr/SWupis/ViewPicture?sNo=' + ${studentId}">
-                        </a>
-                        <!-- Dropdown - User Information -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                             aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="/profile">
-                                <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Profile
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </li>
-
-                </ul>
-
             </nav>
             <!-- End of Topbar -->
 
@@ -141,15 +113,16 @@
                     <div class="col-lg-12 col-md-5 col-sm-5 col-xs-5">
                        
                             <div class="card shadow text-center">
-                                <div class="card-header py-2">
+                                <div class="text-left card-header py-2">
                                     <th class="form-control">
                                         작성자
                                         <span
                                                 th:text="${author}"
-                                                class="card-text" style="margin-left: 10px;"></span>
+                                                class="card-text"
+                                                style="margin-left: 10px;"></span>
                                     </th>
                                 </div>
-                                <div class="card-header py-2">
+                                <div class="text-left card-header py-2">
                                     <th class="form-control mt-4 mb-2">
                                         제목
                                         <span
@@ -157,7 +130,7 @@
                                                 class="card-text" style="margin-left: 10px;"></span>
                                     </th>
                                 </div>
-                                <div class="card-header py-2">
+                                <div class="text-left card-header py-2">
                                     <th class="form-control mt-4 mb-2">
                                         첨부파일
                                         <div th:each="file : ${files}" >
@@ -167,7 +140,7 @@
                                         </div>
                                     </th>
                                 </div>
-                                <div class="card-body" style="height: 400px;">
+                                <div class="text-left card-body" style="height: 400px;">
                                     <div class="form-group">
                                         <th class="form-control">
                                             <span
@@ -184,11 +157,9 @@
                         <div style="margin-left:1px; margin-top: 5px; margin-bottom: 5px;">
                             <a th:href="'/'+${category}" class="btn btn-primary">목록</a>
                             <a
-                                    th:if="${ROLE.toString().equals('ADMIN') || author.equals(memberId)}"
                                     th:href="'/write?category='+${category}+'&id=' + ${id}"
                                     class="btn btn-primary">수정</a>
                             <button
-                                    th:if="${ROLE.toString().equals('ADMIN') || author.equals(memberId)}"
                                     class="btn btn-primary"
                                     data-toggle="modal" data-target="#deleteModal">삭제</button>
                         </div>
@@ -218,26 +189,6 @@
 </a>
 
 <!-- Logout Modal-->
-<div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Logout</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div class="modal-body">로그아웃하시겠습니까?</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
-                <a class="btn btn-primary" href="/out">로그아웃</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Logout Modal-->
 <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -248,11 +199,16 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div class="modal-body">글을 삭제하시겠습니까?</div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
-                <a class="btn btn-primary" th:href="'/delete?category=' + ${category} + '&id=' + ${id}">삭제</a>
-            </div>
+            <form method="post" action="/delete">
+                <div class="modal-body">글 삭제를 위해 작성 시 입력한 비밀번호를 입력해주세요.</div>
+                <input type="hidden" name="category" th:attr="value=${category}">
+                <input type="hidden" name="id" th:attr="value=${id}">
+                <input class="form-control d-flex justify-content-center" type="password" name="password" placeholder="비밀번호" required autocomplete="off">
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
+                    <input class="btn btn-primary" type="submit" value="삭제">
+                </div>
+            </form>
         </div>
     </div>
 </div>
