@@ -186,4 +186,18 @@ public class ArticleService {
                 return true;
         return false;
     }
+
+    public boolean fileUploadCheckJpg(Attachment attachment){
+        boolean result= false;
+        if(attachment.getFileExtension().equalsIgnoreCase(".jpg")
+                ||attachment.getFileExtension().equalsIgnoreCase(".bmp")
+                ||attachment.getFileExtension().equalsIgnoreCase(".gif")
+                ||attachment.getFileExtension().equalsIgnoreCase(".png")
+                ||attachment.getFileExtension().equalsIgnoreCase(".jpeg")){
+            result = true;
+        }
+
+        return result;
+
+    }
 }

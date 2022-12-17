@@ -13,12 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class MainController {
@@ -51,7 +50,8 @@ public class MainController {
     };
     private final String[] video_list = {
             "2022-08-13_capstone.mp4",
-            "2022-09-05_pepper.mp4"
+            "2022-09-05_pepper.mp4",
+            "2022-10-05_LINC.mp4"
     };
     private final Random random = new Random();
 
@@ -79,13 +79,75 @@ public class MainController {
     }
 
     @GetMapping("/{category}")
-    public String showNotice(@PathVariable String category, Model model){
+    public String showNotice(@PathVariable String category, @RequestParam(value = "page", required = false) Long page, Model model) throws IOException {
+        List<Article> articles = articleService.findAll(category).stream().collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+            Collections.reverse(list);
+            return list.stream();
+        })).collect(Collectors.toList());
         model.addAttribute("category", category);
-        model.addAttribute("articles", articleService.findAll(category));
-        if(category.equals("notice"))
+        if(category.equals("notice")) {
+            model.addAttribute("articles", articles);
             return "main/bbs_notice";
-        else return "main/bbs_refer";
+        } else if(category.equals("gallery")){
+            if(page == null){
+                model.addAttribute("status", "404");
+                model.addAttribute("error", "Page Not Found");
+                return "error/404";
+            }
+            List<Article> filterArticles = new ArrayList<>();
+            for(long i = (page-1) * 8; i < (page)*8; i ++){
+                if(i >= articles.size()) break;
+                filterArticles.add(articles.get((int)i));
+            }
+            model.addAttribute("articles", filterArticles);
+
+            long maxPage = (articles.size() / 8) + 1;
+
+            long start = page - 2;
+            long end = page + 2;
+
+            if(maxPage <= 5){
+                start = 1;
+                end = maxPage;
+            } else {
+                if(start < 1){
+                    while(start > 0){
+                        start ++;
+                        end ++;
+                    }
+                }
+                if(end > maxPage){
+                    while(end <= maxPage){
+                        start --;
+                        end --;
+                    }
+                }
+            }
+            List<Long> pagelist = new ArrayList<>();
+            for(long i = start; i <= end; i ++)
+                pagelist.add(i);
+            model.addAttribute("pages", pagelist);
+            HashMap<Long, String> thumbnails = new HashMap<>();
+            for(Article article : articles){
+                List<Attachment> attachments = articleService.findAttachmentByBoardId(article.getId());
+                for(Attachment attachment : attachments){
+                    if(articleService.fileUploadCheckJpg(attachment)){
+                        thumbnails.put(article.getId(), attachment.getOriginPath());
+                        break;
+                    }
+                }
+            }
+            model.addAttribute("thumbnails", thumbnails);
+            return "main/gallery";
+        } else if(category.equals("data")){
+            model.addAttribute("articles", articles);
+            return "main/bbs_refer";
+        }
+        model.addAttribute("status", "404");
+        model.addAttribute("error", "Page Not Found");
+        return "error/404";
     }
+
     @GetMapping("/schedule")
     public String showScheduler(Model model){
         model.addAttribute("schedules", labScheduleService.findAll());
@@ -132,11 +194,14 @@ public class MainController {
                 articleService.postArticle(dto);
             }
         }
+        if(dto.getCategory().equals("gallery")){
+            return "redirect:/"+dto.getCategory()+"?page=1";
+        }
         return "redirect:/" + dto.getCategory();
     }
 
     @GetMapping("/show")
-    public String showArticle(@RequestParam("category") String category, @RequestParam("id") Long id,  Model model){
+    public String showArticle(@RequestParam("category") String category, @RequestParam("id") Long id, Model model){
 
         Optional<Article> articleOptional = articleService.findById(id);
         if(articleOptional.isEmpty()){
@@ -153,6 +218,13 @@ public class MainController {
         model.addAttribute("files", attachmentList);
         model.addAttribute("id", id);
         model.addAttribute("category", category);
+        if(category.equals("gallery")){
+            List<Attachment> images = attachmentList.stream().filter(attachment ->
+                articleService.fileUploadCheckJpg(attachment)
+            ).collect(Collectors.toList());
+            model.addAttribute("images", images);
+            return "main/gallery_extend";
+        }
         return "main/bbs_content";
     }
 
@@ -170,6 +242,9 @@ public class MainController {
             return "alert";
         }
         articleService.deleteById(id);
+        if(category.equals("gallery")){
+            return "redirect:/"+category+"?page=1";
+        }
         return "redirect:/" + category;
     }
 
