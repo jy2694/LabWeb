@@ -1,0 +1,26 @@
+
+W
+java:S2789 "@Methods with an "Optional" return type should never return null.(¥¹ï
+a
+java:S2259+"FA "NullPointerException" could be thrown; "fileName" is nullable here.(“Í¿Şÿÿÿÿÿ
+b
+java:S2259‹"FA "NullPointerException" could be thrown; "fileName" is nullable here.(“Í¿Şÿÿÿÿÿ
+^
+java:S5361,"HReplace this call to "replaceAll()" by a call to the "replace()" method.( ¬ˆâ
+h
+java:S6204H"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹
+h
+java:S6204W"RReplace this usage of 'Stream.collect(Collectors.toList())' with 'Stream.toList()'(ª™¨¹
+P	java:S899o";Do something with the "boolean" value returned by "delete".(ÿÇƒ
+d
+java:S4042o"NUse "java.nio.file.Files#delete" here for better messages on error conditions.(ÿÇƒ
+h
+java:S3776s"RRefactor this method to reduce its Cognitive Complexity from 20 to the 15 allowed.(Á¶İü
+_
+java:S5361Œ"HReplace this call to "replaceAll()" by a call to the "replace()" method.( ¬ˆâ
+Z
+java:S1155§">Use isEmpty() to check whether the collection is empty or not.(•Û‚šşÿÿÿÿ
+U
+java:S1128":Remove this unused import 'java.io.FileNotFoundException'.(·î™ùÿÿÿÿ
+I
+java:S1128"4Remove this unused import 'java.security.Principal'.(’ÛŞ[

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -155,7 +156,7 @@ public class ArticleService {
                     ));
                 }
             }
-        } catch(Exception e1){
+        } catch(IOException e1){
             return null;
         }
         return e;

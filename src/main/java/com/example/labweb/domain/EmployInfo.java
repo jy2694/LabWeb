@@ -18,7 +18,6 @@ public class EmployInfo {
     private String name;
     @Column(nullable = false)
     private String company;
-
     @Column(nullable = false)
     private String profileName;
 

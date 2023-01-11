@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,7 +54,7 @@ public class MainController {
             "2022-09-05_pepper.mp4",
             "2022-10-05_LINC.mp4"
     };
-    private final Random random = new Random();
+    private final SecureRandom random = new SecureRandom();
 
     @GetMapping("/")
     public String mainpage(Model model){
@@ -148,6 +149,24 @@ public class MainController {
         return "error/404";
     }
 
+    @GetMapping("/intro")
+    public String showIntro(Model model){
+        //TODO - 연구실 소개글
+        return "main/introduction";
+    }
+
+    @GetMapping("/eachintro")
+    public String showEachIntro(Model model){
+
+        return "main/each_intro";
+    }
+
+    @GetMapping("/history")
+    public String showLabHistory(Model model){
+
+        return "main/lab_history";
+    }
+
     @GetMapping("/schedule")
     public String showScheduler(Model model){
         model.addAttribute("schedules", labScheduleService.findAll());
@@ -157,19 +176,19 @@ public class MainController {
     @GetMapping("/write")
     public String showWritePage(Model model,  @RequestParam("category") String category, @RequestParam("id") String id){
         model.addAttribute("category", category);
-        try{
-           Long idx = Long.parseLong(id);
-           Optional<Article> article = articleService.findById(idx);
-           if(article.isPresent()){
-               model.addAttribute("title", article.get().getTitle());
-               model.addAttribute("content", article.get().getContent());
-               model.addAttribute("files", articleService.findAttachmentByBoardId(article.get().getId()));
-               model.addAttribute("writer", article.get().getCreatedBy());
-               model.addAttribute("id", idx);
-           } else {
-               model.addAttribute("id", "new");
-           }
-        } catch(Exception e){
+        Long idx = Long.parseLong(id);
+        if(idx != null){
+            Optional<Article> article = articleService.findById(idx);
+            if(article.isPresent()){
+                model.addAttribute("title", article.get().getTitle());
+                model.addAttribute("content", article.get().getContent());
+                model.addAttribute("files", articleService.findAttachmentByBoardId(article.get().getId()));
+                model.addAttribute("writer", article.get().getCreatedBy());
+                model.addAttribute("id", idx);
+            } else {
+                model.addAttribute("id", "new");
+            }
+        } else {
             model.addAttribute("id", "new");
         }
         model.addAttribute("schedules", labScheduleService.findAll());
