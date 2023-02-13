@@ -1,9 +1,9 @@
 package com.example.labweb.controller;
 
+import com.example.labweb.configuration.SessionManager;
 import com.example.labweb.domain.*;
 import com.example.labweb.dto.ArticlePostRequestDTO;
 import com.example.labweb.service.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -13,6 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -28,19 +29,37 @@ public class MainController {
     private EmployInfoService employInfoService;
     private ProjectScheduleService projectScheduleService;
     private MemberService memberService;
+    private SessionManager sessionManager;
 
     @Autowired
     public MainController(ArticleService articleService,
                           LabScheduleService labScheduleService,
                           EmployInfoService employInfoService,
                           ProjectScheduleService projectScheduleService,
-                          MemberService memberService){
+                          MemberService memberService,
+                          SessionManager sessionManager){
         this.articleService = articleService;
         this.labScheduleService = labScheduleService;
         this.employInfoService = employInfoService;
         this.projectScheduleService = projectScheduleService;
         this.memberService = memberService;
+        this.sessionManager = sessionManager;
     }
+
+    @GetMapping("favicon.ico")
+    @ResponseBody
+    public ResponseEntity<Resource> returnFavicon(HttpServletRequest request) {
+        Resource file = articleService.loadFavicon();
+        System.out.println(file);
+        String userAgent = request.getHeader("User-Agent");
+        if(userAgent.indexOf("Trident") > -1)
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + URLEncoder.encode("favicon.ico", StandardCharsets.UTF_8).replaceAll("\\+", "%20") + "\"").body(file);
+        else
+            return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + new String("favicon.ico".getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"").body(file);
+    }
+
 
     private final String[] colorSet = {
             "bg-info",
@@ -151,19 +170,16 @@ public class MainController {
 
     @GetMapping("/intro")
     public String showIntro(Model model){
-        //TODO - 연구실 소개글
         return "main/introduction";
     }
 
     @GetMapping("/eachintro")
     public String showEachIntro(Model model){
-
         return "main/each_intro";
     }
 
     @GetMapping("/history")
-    public String showLabHistory(Model model){
-
+    public String showLabHistory(Model model) {
         return "main/lab_history";
     }
 
@@ -176,8 +192,8 @@ public class MainController {
     @GetMapping("/write")
     public String showWritePage(Model model,  @RequestParam("category") String category, @RequestParam("id") String id){
         model.addAttribute("category", category);
-        Long idx = Long.parseLong(id);
-        if(idx != null){
+        if(!id.equals("new")){
+            Long idx = Long.parseLong(id);
             Optional<Article> article = articleService.findById(idx);
             if(article.isPresent()){
                 model.addAttribute("title", article.get().getTitle());
@@ -220,17 +236,22 @@ public class MainController {
     }
 
     @GetMapping("/show")
-    public String showArticle(@RequestParam("category") String category, @RequestParam("id") Long id, Model model){
-
+    public String showArticle(HttpServletRequest request, @RequestParam("category") String category, @RequestParam("id") Long id, Model model){
         Optional<Article> articleOptional = articleService.findById(id);
         if(articleOptional.isEmpty()){
             model.addAttribute("msg", "글이 삭제되었거나 존재하지 않습니다.");
             model.addAttribute("url", "/");
             return "alert";
         }
-
         List<Attachment> attachmentList = articleService.findAttachmentByBoardId(id);
         Article article = articleOptional.get();
+        String password = (String)sessionManager.getSession(request);
+        if(password == null || !article.getPassword().equals(password)){
+            model.addAttribute("msg", "비밀번호가 일치하지 않습니다.");
+            if(category.equals("gallery")) model.addAttribute("url", "/"+category+"?page=1");
+            else model.addAttribute("url","/"+category);
+            return "alert";
+        }
         model.addAttribute("title", article.getTitle());
         model.addAttribute("content", article.getContent());
         model.addAttribute("author", article.getCreatedBy());
@@ -292,6 +313,14 @@ public class MainController {
         else
             return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                     "attachment; filename=\"" + new String(filename.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1) + "\"").body(file);
+    }
+
+    @PostMapping("/open")
+    public String openArticle(HttpServletRequest request, HttpServletResponse response, String category, Long id, String password){
+        String stored = (String) sessionManager.getSession(request);
+        if(stored != null) sessionManager.expire(request);
+        sessionManager.createSession(password, response);
+        return "redirect:/show?category="+category+"&id="+id;
     }
 
 }

@@ -10,7 +10,6 @@
     <meta name="author" content="">
 
     <title>연구실 정보 서비스</title>
-
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link
@@ -24,7 +23,8 @@
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
     <script th:inline="javascript">
         function gotoArticle(category, id){
-            location.href="/show?category="+category+"&id=" + id;
+            document.getElementById("hidden-category").value = category;
+            document.getElementById("hidden-id").value = id;
         }
     </script>
 </head>
@@ -143,7 +143,10 @@
                                 <div class = "col-sm-3 col-md-6 col-lg-3" th:if="${articles.size() > 0}" th:each="article : ${articles}">
                                     <div class="card shadow py-4">
                                         <div class="card-content d-flex justify-content-center">
-                                            <a th:href="@{/show?category=gallery&id=} + ${article.id}">
+                                            <a data-toggle="modal" data-target="#deleteModal"
+                                               th:ArticleId="${article.id}"
+                                               th:onClick="gotoArticle('gallery', this.getAttribute('ArticleId'))">
+                                                <!-- th:href="@{/show?category=gallery&id=} + ${article.id}" -->
                                                 <img th:if="${thumbnails[article.id] != null}"
                                                         th:src="@{files/} + ${thumbnails[article.id]}" style="max-width: 100%; height: 200px" >
                                                 <img th:if="${thumbnails[article.id] == null}"
@@ -210,7 +213,30 @@
     <!-- Page level plugins -->
     <script src="vendor/datatables/jquery.dataTables.min.js"></script>
     <script src="vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
+    <!-- Logout Modal-->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">열람 권한 확인</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form method="post" action="/open">
+                    <div class="modal-body">열람에 필요한 비밀번호를 입력해주세요.</div>
+                    <input id="hidden-category" type="hidden" name="category">
+                    <input id="hidden-id" type="hidden" name="id">
+                    <input class="form-control d-flex justify-content-center" type="password" name="password" placeholder="비밀번호" required autocomplete="off">
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" type="button" data-dismiss="modal">취소</button>
+                        <input class="btn btn-primary" type="submit" value="열람">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 </body>
 

@@ -168,6 +168,18 @@ public class ArticleService {
         return attachments.get(0);
     }
 
+    public Resource loadFavicon(){
+        try{
+            Path file = Paths.get("build/resources/main/static").resolve("favicon.ico");
+            Resource resource = new UrlResource(file.toUri());
+            if(resource.exists() || resource.isReadable())
+                return resource;
+            else return null;
+        } catch(MalformedURLException e){
+            return null;
+        }
+    }
+
     public Resource loadAsResource(String filename){
         try {
             Path file = Paths.get(properties.getLocation()).resolve(filename);
@@ -199,6 +211,5 @@ public class ArticleService {
         }
 
         return result;
-
     }
 }
